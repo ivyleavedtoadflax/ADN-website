@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Permisos de construcción — Reúna sus documentos | ADN</title>
+<!--
+  drimstack prototype 2 of 3 — "Reúne estos documentos antes de empezar"
+  Ayuntamiento del Distrito Nacional · Dirección de Planeamiento Urbano
+
+  Standards cited (see references/dr-service-standards.md):
+  - Standard 1 (meet user needs): surfaces the full prerequisite chain BEFORE
+    the citizen starts a trámite, instead of leaving it buried in a legalese
+    paragraph they discover halfway through — see REVIEW.md problem #6.
+  - Standard 3 (everyone can use it): plain Spanish, phone-first layout, no
+    web-font download, offline channels (Punto GOB, *462) signposted.
+  - Standard 4 (simple and relatable language): a one-line plain-language
+    explanation for every document — see REVIEW.md problem #7.
+  - Standard 5 (works first time): the design hypothesis is that a citizen who
+    completes this checklist should not lose a trip to Planeamiento Urbano for
+    a document they didn't know they needed.
+  - Standard 7 (open, interoperable platforms): the assumptions panel flags
+    which of these documents are really lookups other instituciones already
+    hold (Jurisdicción Inmobiliaria, DGII, MIVED) and could become an X-Road
+    check instead of an upload — not built here, flagged for beta.
+
+  GOV.UK Design Principles: 2 Do less (three branching questions, no more),
+  4 Do the hard work to make it simple (translates the scraped OBSERVACIONES
+  legalese into a per-document, per-institución checklist), 9 Be consistent
+  (shared gobdo- house-style tokens, identical chrome across all three
+  prototypes).
+
+  Fixes REVIEW.md problems #6 (invisible prerequisite chain) and #7
+  (no plain-language layer). Requirement content is taken verbatim from
+  pages/solicitud-de-anteproyecto.md, pages/solicitud-de-remodelacion-y-o-anexos.md
+  and pages/solicitud-de-certificacion-de-uso-de-suelo-2.md — nothing here is
+  invented; assumptions and gaps are logged in the panel, not hidden.
+-->
+
+<!-- ============ <style> block (verbatim from _house-style.html) ============ -->
+<style id="gobdo-tokens">
+  :root {
+    --gobdo-navy: #003876;
+    --gobdo-navy-dark: #012a5a;
+    --gobdo-red: #D50910;
+    --gobdo-off-white: #F7F7F7;
+    --gobdo-charcoal: #212529;
+    --gobdo-white: #FFFFFF;
+    --gobdo-grey-light: #DDDDDD;
+    --gobdo-grey-mid: #777777;
+    --gobdo-error: #D50910;
+    --gobdo-green: #2CB34A;
+    --gobdo-blue-grey: #194A84;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Poppins", system-ui, sans-serif;
+    background: var(--gobdo-off-white); color: var(--gobdo-charcoal);
+    line-height: 1.55; font-size: 18px;
+  }
+  h1, h2, h3, h4 { color: var(--gobdo-navy); line-height: 1.25; }
+  h1 { font-size: 2rem; font-weight: 600; margin: 0 0 1rem; }
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 2rem 0 .75rem; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+  a { color: var(--gobdo-navy); }
+  .gobdo-official-banner {
+    background: var(--gobdo-navy-dark); color: #fff; font-size: .8rem;
+    text-align: center; padding: .35rem 1rem;
+  }
+  .gobdo-header {
+    background: var(--gobdo-navy); color: #fff; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: .9rem;
+  }
+  .gobdo-header .escudo {
+    width: 42px; height: 42px; border-radius: 50%; background: #fff;
+    color: var(--gobdo-navy); display: grid; place-items: center;
+    font-weight: 700; font-size: .8rem; flex: 0 0 auto;
+  }
+  .gobdo-header .titles small { display: block; opacity: .85; font-size: .75rem; }
+  .gobdo-header .titles strong { font-size: 1.05rem; font-weight: 600; }
+  .gobdo-status-banner {
+    font-size: .85rem; padding: .5rem 1.25rem; text-align: center;
+    background: #fff3cd; color: #664d03; border-bottom: 1px solid #ffe69c;
+  }
+  .drimstack-banner {
+    background: var(--gobdo-charcoal); color: #fff; font-size: .8rem;
+    padding: .5rem 1.25rem; display: flex; justify-content: space-between;
+    align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .drimstack-banner button {
+    background: transparent; color: #fff; border: 1px solid #fff;
+    border-radius: 4px; padding: .3rem .7rem; cursor: pointer; font-size: .78rem;
+  }
+  .gobdo-container { max-width: 760px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+  .gobdo-btn {
+    display: inline-block; background: var(--gobdo-green); color: #fff;
+    border: none; border-radius: 4px; padding: .7rem 1.4rem; font-size: 1.05rem;
+    font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit;
+  }
+  .gobdo-btn:hover { filter: brightness(.94); }
+  .gobdo-btn--secondary { background: #fff; color: var(--gobdo-navy); border: 2px solid var(--gobdo-navy); }
+  .gobdo-back { display: inline-block; margin-bottom: 1rem; color: var(--gobdo-navy); }
+  .gobdo-card {
+    background: #fff; border: 1px solid var(--gobdo-grey-light);
+    border-radius: 6px; padding: 1.1rem 1.25rem; margin: 1rem 0;
+  }
+  .gobdo-inset { border-left: 5px solid var(--gobdo-navy); padding: .25rem 0 .25rem 1rem; margin: 1rem 0; }
+  .gobdo-tag {
+    display: inline-block; background: var(--gobdo-navy); color: #fff;
+    font-size: .8rem; font-weight: 600; padding: .2rem .6rem; border-radius: 4px;
+  }
+  .gobdo-meta { display: flex; flex-wrap: wrap; gap: 1.25rem; margin: 1rem 0 1.5rem; }
+  .gobdo-meta div { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; padding: .6rem .9rem; min-width: 150px; }
+  .gobdo-meta small { display: block; color: var(--gobdo-grey-mid); font-size: .75rem; text-transform: uppercase; letter-spacing: .03em; }
+  .gobdo-meta strong { font-size: 1.1rem; color: var(--gobdo-navy); }
+  details.gobdo-details { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; margin: .6rem 0; padding: 0 1rem; }
+  details.gobdo-details > summary { cursor: pointer; padding: .8rem 0; font-weight: 600; color: var(--gobdo-navy); }
+  .gobdo-footer { background: var(--gobdo-navy); color: #fff; padding: 1.5rem 1.25rem; font-size: .85rem; }
+  .gobdo-footer a { color: #fff; margin-right: 1.25rem; }
+  .drimstack-assumptions {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 90vw);
+    background: #fff; border-left: 4px solid var(--gobdo-charcoal);
+    box-shadow: -6px 0 24px rgba(0,0,0,.2); padding: 1.25rem; overflow-y: auto;
+    transform: translateX(100%); transition: transform .25s ease; z-index: 50;
+  }
+  .drimstack-assumptions--open { transform: translateX(0); }
+  .drimstack-assumptions h2 { margin-top: 0; }
+  .drimstack-assumptions li { margin-bottom: .8rem; font-size: .9rem; }
+  .tag { font-size: .7rem; font-weight: 700; padding: .1rem .4rem; border-radius: 3px; background: #eee; color: #333; white-space: nowrap; }
+  .fake { background: #fff3cd; border: 1px dashed #997404; color: #664d03; font-size: .8rem; padding: .15rem .5rem; border-radius: 3px; }
+  .page { display: none; }
+  .page--active { display: block; }
+</style>
+
+<!-- ============ prototype-specific extensions (form/checklist patterns not
+     yet covered by the shared tokens — built from primitives, gobdo- prefixed,
+     CSS variables only, no new colours). Flagged as candidate tokens in the
+     assumptions panel. ============ -->
+<style id="gobdo-prototype-extensions">
+  .gobdo-sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  fieldset.gobdo-fieldset { border: none; padding: 0; margin: 0; }
+  fieldset.gobdo-fieldset legend { padding: 0; width: 100%; }
+  fieldset.gobdo-fieldset legend h1,
+  fieldset.gobdo-fieldset legend h2 { margin: 0 0 .5rem; }
+  .gobdo-hint { color: var(--gobdo-grey-mid); font-size: .95rem; margin: 0 0 1rem; }
+  .gobdo-radio-group,
+  .gobdo-check-list { list-style: none; margin: 1rem 0 1.5rem; padding: 0; }
+  .gobdo-radio-option {
+    display: block; background: #fff; border: 1px solid var(--gobdo-grey-light);
+    border-radius: 6px; padding: .8rem 1rem; margin-bottom: .6rem;
+  }
+  .gobdo-radio-option label { cursor: pointer; font-weight: 600; }
+  .gobdo-radio-option input[type="radio"] { margin-right: .6rem; transform: scale(1.15); vertical-align: middle; }
+  .gobdo-radio-option .gobdo-hint { margin: .3rem 0 0 1.7rem; font-size: .88rem; }
+  .gobdo-error-summary {
+    display: none; border: 3px solid var(--gobdo-error); border-radius: 6px;
+    padding: 1rem 1.25rem; margin: 0 0 1.5rem; background: #fff;
+  }
+  .gobdo-error-summary--visible { display: block; }
+  .gobdo-error-summary h2 { color: var(--gobdo-error); margin: 0 0 .5rem; font-size: 1.15rem; }
+  .gobdo-error-summary ul { margin: 0; padding-left: 1.2rem; }
+  .gobdo-error-summary a { color: var(--gobdo-error); font-weight: 600; }
+  .gobdo-error-message {
+    display: none; color: var(--gobdo-error); font-weight: 600; margin: 0 0 1rem;
+  }
+  .gobdo-error-message--visible { display: block; }
+  .gobdo-check-row {
+    display: flex; gap: .7rem; align-items: flex-start; background: #fff;
+    border: 1px solid var(--gobdo-grey-light); border-radius: 6px;
+    padding: .8rem 1rem; margin-bottom: .6rem;
+  }
+  .gobdo-check-row input[type="checkbox"] { margin-top: .35rem; width: 1.2rem; height: 1.2rem; flex: 0 0 auto; }
+  .gobdo-check-row label { font-weight: 600; color: var(--gobdo-navy); display: block; cursor: pointer; }
+  .gobdo-check-row .item-note { margin: .35rem 0 0; font-size: .92rem; }
+  .gobdo-check-row .gobdo-tag { margin-top: .5rem; }
+  .gobdo-progress {
+    position: sticky; top: 0; background: var(--gobdo-off-white);
+    padding: .7rem 0; margin-bottom: .5rem; font-weight: 600; font-size: 1.05rem;
+    border-bottom: 2px solid var(--gobdo-grey-light); z-index: 5;
+  }
+  .gobdo-summary-ready { border-left: 6px solid var(--gobdo-green); }
+  .gobdo-summary-missing { border-left: 6px solid var(--gobdo-error); }
+  .gobdo-summary-missing h1 { color: var(--gobdo-error); }
+  .gobdo-summary-ready h1 { color: var(--gobdo-green); }
+  .gobdo-inline-link-btn {
+    background: none; border: none; padding: 0; color: var(--gobdo-navy);
+    text-decoration: underline; cursor: pointer; font: inherit;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ body chrome — top (verbatim from _house-style.html) ============ -->
+<div class="gobdo-official-banner">Este es un servicio oficial del Gobierno de la República Dominicana</div>
+<header class="gobdo-header">
+  <span class="escudo">ADN</span>
+  <span class="titles">
+    <small>Ayuntamiento del Distrito Nacional · Planeamiento Urbano</small>
+    <strong>Permisos de construcción</strong>
+  </span>
+</header>
+<div class="gobdo-status-banner">Versión alfa — esto es un prototipo, no lo use para trámites reales</div>
+<div class="drimstack-banner">
+  <span>drimstack prototype: Variante 2 de 3 — Lista de documentos con verificación previa</span>
+  <button onclick="toggleAssumptions()">Ver supuestos (9)</button>
+</div>
+
+<main class="gobdo-container">
+
+  <!-- ============ PAGE: Start ============ -->
+  <div id="page-start" class="page page--active">
+    <h1>Reúna estos documentos antes de solicitar su permiso</h1>
+    <p>Antes de solicitar un permiso de construcción, reúna estos documentos. Le tomará unos minutos comprobar que los tiene todos.</p>
+    <p>Algunos documentos los emite el Ayuntamiento. Otros los emite la Jurisdicción Inmobiliaria, el MIVED o la DGII. Si el día de la solicitud le falta uno, tendrá que volver otro día.</p>
+    <div class="gobdo-meta">
+      <div>
+        <small>Le preguntaremos</small>
+        <strong>3 cosas</strong>
+      </div>
+      <div>
+        <small>Tiempo de respuesta del trámite</small>
+        <strong>30 a 45 días laborables</strong>
+      </div>
+    </div>
+    <p class="gobdo-hint">¿Prefiere hacer esto en persona o necesita ayuda? Puede visitar un <a href="#">Punto GOB</a> o llamar al <strong>*462</strong>.</p>
+    <button type="button" class="gobdo-btn" onclick="goTo('page-q1')">Comenzar</button>
+  </div>
+
+  <!-- ============ PAGE: Q1 — qué desea solicitar ============ -->
+  <div id="page-q1" class="page">
+    <a href="#" class="gobdo-back" onclick="goTo('page-start'); return false;">Volver</a>
+
+    <div id="tramite-error-summary" class="gobdo-error-summary" role="alert" aria-labelledby="tramite-error-summary-title">
+      <h2 id="tramite-error-summary-title">Hay un problema</h2>
+      <ul><li><a href="#tramite-anteproyecto" onclick="document.getElementById('tramite-anteproyecto').focus(); return false;">Elija qué desea solicitar</a></li></ul>
+    </div>
+
+    <form novalidate onsubmit="return submitQuestion(event, 'tramite', 'tramite', 'Elija qué desea solicitar', 'page-q2');">
+      <fieldset class="gobdo-fieldset">
+        <legend><h1 id="tramite-heading">¿Qué desea solicitar?</h1></legend>
+        <p id="tramite-error-message" class="gobdo-error-message">Elija qué desea solicitar</p>
+        <ul class="gobdo-radio-group">
+          <li class="gobdo-radio-option">
+            <input type="radio" name="tramite" id="tramite-anteproyecto" value="anteproyecto">
+            <label for="tramite-anteproyecto">Anteproyecto</label>
+            <span class="gobdo-hint">La primera revisión de sus planos, antes de construir.</span>
+          </li>
+          <li class="gobdo-radio-option">
+            <input type="radio" name="tramite" id="tramite-remodelacion" value="remodelacion">
+            <label for="tramite-remodelacion">Remodelación y/o Anexos</label>
+            <span class="gobdo-hint">Cambios a una construcción que ya tiene licencia del MIVED.</span>
+          </li>
+          <li class="gobdo-radio-option">
+            <input type="radio" name="tramite" id="tramite-usosuelo" value="usosuelo">
+            <label for="tramite-usosuelo">Certificación de Uso de Suelo</label>
+            <span class="gobdo-hint">Confirma qué se puede construir o usar en ese terreno: residencial, comercial, mixto, etc.</span>
+          </li>
+        </ul>
+      </fieldset>
+      <button type="submit" class="gobdo-btn">Continuar</button>
+    </form>
+  </div>
+
+  <!-- ============ PAGE: Q2 — titular ============ -->
+  <div id="page-q2" class="page">
+    <a href="#" class="gobdo-back" onclick="goTo('page-q1'); return false;">Volver</a>
+
+    <div id="titular-error-summary" class="gobdo-error-summary" role="alert" aria-labelledby="titular-error-summary-title">
+      <h2 id="titular-error-summary-title">Hay un problema</h2>
+      <ul><li><a href="#titular-fisica" onclick="document.getElementById('titular-fisica').focus(); return false;">Elija quién es el titular del inmueble</a></li></ul>
+    </div>
+
+    <form novalidate onsubmit="return submitQuestion(event, 'titular', 'titular', 'Elija quién es el titular del inmueble', 'page-q3');">
+      <fieldset class="gobdo-fieldset">
+        <legend><h1 id="titular-heading">¿Quién es el titular del inmueble?</h1></legend>
+        <p class="gobdo-hint">El titular es la persona o entidad dueña del inmueble según el título de propiedad.</p>
+        <p id="titular-error-message" class="gobdo-error-message">Elija quién es el titular del inmueble</p>
+        <ul class="gobdo-radio-group">
+          <li class="gobdo-radio-option">
+            <input type="radio" name="titular" id="titular-fisica" value="fisica">
+            <label for="titular-fisica">Usted mismo/a (persona física)</label>
+          </li>
+          <li class="gobdo-radio-option">
+            <input type="radio" name="titular" id="titular-compania" value="compania">
+            <label for="titular-compania">Una compañía</label>
+          </li>
+          <li class="gobdo-radio-option">
+            <input type="radio" name="titular" id="titular-fideicomiso" value="fideicomiso">
+            <label for="titular-fideicomiso">Un fideicomiso</label>
+          </li>
+          <li class="gobdo-radio-option">
+            <input type="radio" name="titular" id="titular-fallecido" value="fallecido">
+            <label for="titular-fallecido">El titular falleció y usted es heredero/a</label>
+          </li>
+        </ul>
+      </fieldset>
+      <button type="submit" class="gobdo-btn">Continuar</button>
+    </form>
+  </div>
+
+  <!-- ============ PAGE: Q3 — Gazcue / Zona Colonial ============ -->
+  <div id="page-q3" class="page">
+    <a href="#" class="gobdo-back" onclick="goTo('page-q2'); return false;">Volver</a>
+
+    <div id="zona-error-summary" class="gobdo-error-summary" role="alert" aria-labelledby="zona-error-summary-title">
+      <h2 id="zona-error-summary-title">Hay un problema</h2>
+      <ul><li><a href="#zona-si" onclick="document.getElementById('zona-si').focus(); return false;">Diga si el inmueble está en Gazcue o la Zona Colonial</a></li></ul>
+    </div>
+
+    <form novalidate onsubmit="return submitQuestion(event, 'zona', 'zona', 'Diga si el inmueble está en Gazcue o la Zona Colonial', 'page-checklist');">
+      <fieldset class="gobdo-fieldset">
+        <legend><h1 id="zona-heading">¿El inmueble está en Gazcue o en la Zona Colonial?</h1></legend>
+        <p class="gobdo-hint">Estas dos zonas tienen protección patrimonial. Si no está seguro/a, revíselo en el plano de mensura o pregunte en Planeamiento Urbano.</p>
+        <p id="zona-error-message" class="gobdo-error-message">Diga si el inmueble está en Gazcue o la Zona Colonial</p>
+        <ul class="gobdo-radio-group">
+          <li class="gobdo-radio-option">
+            <input type="radio" name="zona" id="zona-si" value="si">
+            <label for="zona-si">Sí, está en Gazcue o la Zona Colonial</label>
+          </li>
+          <li class="gobdo-radio-option">
+            <input type="radio" name="zona" id="zona-no" value="no">
+            <label for="zona-no">No</label>
+          </li>
+        </ul>
+      </fieldset>
+      <button type="submit" class="gobdo-btn">Continuar</button>
+    </form>
+  </div>
+
+  <!-- ============ PAGE: Checklist ============ -->
+  <div id="page-checklist" class="page">
+    <a href="#" class="gobdo-back" onclick="goTo('page-q3'); return false;">Volver</a>
+    <h1>Su lista de documentos</h1>
+    <p id="checklist-summary-line">
+      Trámite: <strong id="summary-tramite-name"></strong> ·
+      Titular: <strong id="summary-titular-name"></strong> ·
+      Zona patrimonial: <strong id="summary-zona-name"></strong>.
+      <button type="button" class="gobdo-inline-link-btn" onclick="goTo('page-q1')">Cambiar respuestas</button>
+    </p>
+
+    <div id="usosuelo-callout" class="gobdo-inset" style="display:none;">
+      <strong>Para la Certificación de Uso de Suelo no necesita:</strong> documento de identidad del arquitecto, copia del carnet CODIA, Certificación de No Carga y Gravamen, Certificación de estar al día con el ADN, ni los planos en AutoCAD.
+    </div>
+
+    <p id="progress-status" class="gobdo-progress" aria-live="polite">
+      <span id="progress-count">0</span> de <span id="progress-total">0</span> documentos listos
+    </p>
+
+    <div id="checklist-groups"><!-- rendered by renderChecklist() --></div>
+
+    <button type="button" class="gobdo-btn" onclick="goToSummary()">Ver resumen</button>
+  </div>
+
+  <!-- ============ PAGE: Summary ============ -->
+  <div id="page-summary" class="page">
+    <a href="#" class="gobdo-back" onclick="goTo('page-checklist'); return false;">Volver</a>
+
+    <div id="summary-card" class="gobdo-card">
+      <h1 id="summary-heading"></h1>
+      <div id="summary-missing-block" style="display:none;">
+        <p>Le faltan estos documentos. Consígalos antes de ir a Planeamiento Urbano:</p>
+        <ul id="summary-missing-list"></ul>
+      </div>
+      <div id="summary-ready-block" style="display:none;">
+        <p>Tiene todos los documentos que necesita para este trámite.</p>
+      </div>
+    </div>
+
+    <div class="gobdo-meta">
+      <div>
+        <small>Trámite</small>
+        <strong id="summary-cost-tramite"></strong>
+      </div>
+      <div>
+        <small>Costo</small>
+        <strong id="summary-cost"></strong>
+      </div>
+      <div>
+        <small>Tiempo de respuesta</small>
+        <strong id="summary-time"></strong>
+      </div>
+    </div>
+
+    <p class="gobdo-hint" id="summary-fake-note">El costo se paga de forma presencial, en la caja del Ayuntamiento, después de revisar su solicitud.</p>
+
+    <button type="button" id="summary-cta" class="gobdo-btn" onclick="alert('En la versión real, este botón lo llevará al formulario de solicitud en línea (prototipo 3).')">Continuar a la solicitud</button>
+    <a href="#" class="gobdo-btn gobdo-btn--secondary" style="margin-left:.6rem;" onclick="goTo('page-checklist'); return false;">Volver a la lista</a>
+  </div>
+
+</main>
+
+<!-- ============ body chrome — footer (verbatim from _house-style.html) ============ -->
+<footer class="gobdo-footer">
+  <p><a href="https://www.gob.do">Portal Único gob.do</a><a href="#">Punto GOB</a><a href="#">*462</a><a href="#">Política de privacidad</a></p>
+  <p style="opacity:.8">Ayuntamiento del Distrito Nacional · Prototipo drimstack · No es un servicio en vivo</p>
+</footer>
+
+<!-- ============ assumptions panel ============ -->
+<aside id="assumptions" class="drimstack-assumptions" aria-label="Supuestos de este prototipo">
+  <h2>Supuestos de este prototipo</h2>
+  <p>Este prototipo prueba una hipótesis: un comprobador de requisitos ANTES del formulario evita que alguien llegue a Planeamiento Urbano sin un documento. Estos son los supuestos detrás de esa hipótesis.</p>
+  <ul>
+    <li><span class="tag">VERIFY WITH USERS</span> Que estas tres preguntas (trámite, titular, ubicación) sean el conjunto mínimo correcto para adaptar la lista, y que el orden (trámite primero) sea el que un solicitante primerizo espera.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Que la lista de Uso de Suelo sea realmente más corta (sin identidad del arquitecto, CODIA, No Carga y Gravamen, solvencia del ADN ni planos AutoCAD), tal como aparece en la página fuente — y no un error de contenido, dado que esa misma página tiene los encabezados vacíos que describe REVIEW.md #1.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Quién emite formalmente el "Registro Mercantil vigente" (se asume Cámara de Comercio y Producción) y la "Determinación de Herederos" (se asume vía notario o tribunal) — las páginas de ADN no lo dicen.</li>
+    <li><span class="tag">VERIFY WITH DATA</span> Que "vivienda de hasta 2 niveles" frente a "todo tipo de proyecto" sea el factor real que decide entre RD$9,500 y RD$14,500 para Anteproyecto y Remodelación, y si conviene una cuarta pregunta para mostrar el monto exacto en vez de los dos.</li>
+    <li><span class="tag">VERIFY WITH POLICY</span> Si, según el Decreto 229-18 de simplificación de trámites, el propio ADN podría comprobar la "Certificación de estar al día con el ADN" internamente (Depto. de Recaudación) en vez de pedirle al ciudadano que la suba — es un documento que emite la misma institución que presta el servicio.</li>
+    <li><span class="tag">VERIFY WITH OGTIC</span> Si la "Certificación de No Carga y Gravamen" (Jurisdicción Inmobiliaria) está en el Catálogo Abierto de APIs del Estado bajo el Decreto 403-26. Si lo está, esta lista podría comprobar automáticamente que el documento existe y está vigente, en vez de solo recordárselo al ciudadano — Estándar 7.</li>
+    <li><span class="tag">KNOWN GAP</span> No se cubren todos los casos del bloque OBSERVACIONES de las páginas fuente: condominio (Acta de Asamblea según la Ley 5038-58), más de un inmueble (mensura catastral unificada) y acto de compra-venta sin registrar. Un solicitante en alguno de estos casos no vería el documento adicional en esta lista.</li>
+    <li><span class="tag">KNOWN GAP</span> La lista no se guarda entre sesiones — si cierra o recarga la página, pierde las respuestas. El botón "Continuar a la solicitud" es un marcador de posición; aún no está conectado al prototipo 3 (envío en línea y estado).</li>
+    <li><span class="tag">VERIFY WITH USERS</span> Que las explicaciones en una línea (por ejemplo "la emite la Jurisdicción Inmobiliaria") sean realmente más claras para alguien que solicita por primera vez, y que "una compañía" o "un fideicomiso" no necesiten una explicación adicional para quien no conoce esas figuras legales.</li>
+  </ul>
+  <button type="button" class="gobdo-btn gobdo-btn--secondary" onclick="toggleAssumptions()">Cerrar</button>
+</aside>
+
+<!-- ============ shared script (verbatim from _house-style.html) ============ -->
+<script>
+  function goTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('page--active'));
+    var el = document.getElementById(pageId);
+    if (el) el.classList.add('page--active');
+    window.scrollTo(0, 0);
+  }
+  function toggleAssumptions() {
+    document.getElementById('assumptions').classList.toggle('drimstack-assumptions--open');
+  }
+</script>
+
+<!-- ============ prototype-specific script ============ -->
+<script>
+  // ---- state -------------------------------------------------------------
+  var state = { tramite: null, titular: null, zona: null };
+  var originalTitle = document.title;
+
+  // ---- document data (grounded in pages/solicitud-de-anteproyecto.md,
+  // pages/solicitud-de-remodelacion-y-o-anexos.md and
+  // pages/solicitud-de-certificacion-de-uso-de-suelo-2.md — invented nothing,
+  // only added the plain-language "note" and the "tag" for which institución
+  // issues it. See REVIEW.md problem #7.) --------------------------------
+  var DOCS = {
+    formulario: { label: "Formulario de solicitud", note: "Descárguelo en la página del trámite, complételo y guárdelo listo para entregar.", tag: null },
+    titulo: { label: "Título de propiedad, digitalizado", note: "Escanéelo en PDF. Es el documento que demuestra quién es el dueño del inmueble.", tag: null },
+    mensura: { label: "Plano de Mensura Catastral, digitalizado", note: "El plano que ubica y mide su terreno. Si son varios inmuebles, use una mensura unificada firmada por el agrimensor.", tag: null },
+    ubicacion: { label: "Ubicación del inmueble", note: "Búsquelo en Google Maps, haga clic en el lugar exacto y convierta la captura en PDF.", tag: null },
+    poder: { label: "Poder notarizado", note: "El documento donde el propietario autoriza a quien solicita el trámite a actuar ante el Ayuntamiento. Debe incluir los datos del título.", tag: "Lo firma un notario" },
+    id_propietario: { label: "Documento de identidad del propietario", note: "Cédula o pasaporte, en PDF.", tag: null },
+    id_solicitante: { label: "Documento de identidad de quien solicita", note: "Si usted no es el propietario, añada también su documento de identidad, en PDF.", tag: null },
+    id_arquitecto: { label: "Documento de identidad del arquitecto", note: "Cédula o pasaporte del arquitecto responsable del proyecto, en PDF.", tag: null },
+    codia: { label: "Copia del carnet del CODIA del arquitecto", note: "Lo acredita como arquitecto colegiado.", tag: "Lo tiene su arquitecto" },
+    no_carga: { label: "Certificación de No Carga y Gravamen", note: "Confirma que el inmueble no tiene deudas ni hipotecas pendientes. Debe tener menos de 6 meses de emitida. <span class=\"fake\">Ejemplo: si hoy fuera 24 de julio de 2026, sirve una certificación con fecha después del 24 de enero de 2026.</span> Si el inmueble sí tiene gravamen, añada también una carta de no objeción del banco.", tag: "La emite la Jurisdicción Inmobiliaria" },
+    adn_solvencia: { label: "Certificación de estar al día con el ADN", note: "Confirma que no debe el pago de arbitrios municipales. También sirve el último recibo de pago de basura.", tag: "La emite Recaudación del ADN" },
+    planos_dwg: { label: "Juego de planos arquitectónicos en AutoCAD", note: "Un solo archivo .dwg con todas las hojas del proyecto, cada una en su propio layout.", tag: null },
+    mived_licencia: { label: "Certificación de Licencia de Construcción del MIVED", note: "La licencia vigente de la construcción que ya existe, emitida por el Ministerio de Vivienda, Hábitat y Edificaciones (antes MOPC).", tag: "La emite el MIVED" },
+    mived_planos: { label: "Planos aprobados por el MIVED de la edificación existente", note: "Los planos ya aprobados de lo que hay construido hoy, digitalizados en un solo archivo.", tag: "Se los entrega el MIVED" },
+    reg_mercantil: { label: "Registro Mercantil vigente y Acta de Asamblea (menos de 1 año)", note: "Añádalo en el mismo PDF del título de propiedad. Confirma que la compañía existe y quién puede representarla.", tag: "La emite la Cámara de Comercio" },
+    fideicomiso_contrato: { label: "Contrato del Fideicomiso", note: "Incluya también el adendum, si existe alguno.", tag: null },
+    fideicomiso_acta: { label: "Acta de constitución del Fideicomiso", note: "El poder de autorización lo firma el representante de la fiduciaria que aparece en este contrato.", tag: "La emite la DGII" },
+    herencia_determinacion: { label: "Determinación de Herederos", note: "El documento legal que identifica quiénes heredan el inmueble.", tag: null },
+    herencia_defuncion: { label: "Acta de Defunción", note: "Del titular fallecido, en PDF.", tag: "La emite la Oficialía del Estado Civil (JCE)" },
+    herencia_id: { label: "Documento de identidad de los herederos", note: "O actas de nacimiento si alguno es menor de edad, todo en un PDF.", tag: null },
+    herencia_poder: { label: "Poder de representación", note: "Solo si uno de los herederos representa a los demás.", tag: null },
+    dnpm: { label: "Certificado de No Objeción de la DNPM", note: "Confirma que la Dirección Nacional de Patrimonio Monumental no tiene objeción, por estar en una zona protegida.", tag: "La emite la DNPM" }
+  };
+
+  var TRAMITE_COMMON = {
+    anteproyecto: ["formulario","titulo","mensura","ubicacion","poder","id_propietario","id_solicitante","id_arquitecto","codia","no_carga","adn_solvencia","planos_dwg"],
+    remodelacion: ["formulario","titulo","mensura","ubicacion","poder","id_propietario","id_solicitante","id_arquitecto","codia","no_carga","adn_solvencia","planos_dwg"],
+    usosuelo: ["formulario","titulo","mensura","ubicacion","poder","id_propietario","id_solicitante"]
+  };
+  var TRAMITE_EXTRA = { remodelacion: ["mived_licencia","mived_planos"] };
+  var TITULAR_EXTRA = {
+    compania: ["reg_mercantil"],
+    fideicomiso: ["fideicomiso_contrato","fideicomiso_acta"],
+    fallecido: ["herencia_determinacion","herencia_defuncion","herencia_id","herencia_poder"]
+  };
+  var ZONA_EXTRA = ["dnpm"];
+
+  var TRAMITE_INFO = {
+    anteproyecto: { name: "Anteproyecto", cost: "RD$9,500 (vivienda de hasta 2 niveles) o RD$14,500 (todo tipo de proyecto)", time: "30 a 45 días hábiles" },
+    remodelacion: { name: "Remodelación y/o Anexos", cost: "RD$9,500 (vivienda de hasta 2 niveles) o RD$14,500 (todo tipo de proyecto)", time: "30 a 45 días laborables" },
+    usosuelo: { name: "Certificación de Uso de Suelo", cost: "RD$4,500", time: "30 a 45 días laborables" }
+  };
+  var TITULAR_LABEL = { fisica: "usted mismo/a", compania: "una compañía", fideicomiso: "un fideicomiso", fallecido: "herederos (titular fallecido)" };
+  var ZONA_LABEL = { si: "Sí", no: "No" };
+
+  // ---- validation (error summary + inline error, "Error: " title prefix) --
+  function submitQuestion(event, groupName, field, errorText, nextPageId) {
+    event.preventDefault();
+    var checked = document.querySelector('input[name="' + groupName + '"]:checked');
+    var summary = document.getElementById(groupName + '-error-summary');
+    var inline = document.getElementById(groupName + '-error-message');
+    var heading = document.getElementById(groupName + '-heading');
+    var radios = document.querySelectorAll('input[name="' + groupName + '"]');
+
+    if (!checked) {
+      summary.classList.add('gobdo-error-summary--visible');
+      inline.classList.add('gobdo-error-message--visible');
+      inline.textContent = errorText;
+      radios.forEach(function (r) {
+        r.setAttribute('aria-invalid', 'true');
+        r.setAttribute('aria-describedby', groupName + '-error-message');
+      });
+      if (heading.dataset.original === undefined) heading.dataset.original = heading.textContent;
+      heading.textContent = 'Error: ' + heading.dataset.original;
+      document.title = 'Error: ' + originalTitle;
+      summary.setAttribute('tabindex', '-1');
+      summary.focus();
+      return false;
+    }
+
+    summary.classList.remove('gobdo-error-summary--visible');
+    inline.classList.remove('gobdo-error-message--visible');
+    radios.forEach(function (r) {
+      r.removeAttribute('aria-invalid');
+      r.removeAttribute('aria-describedby');
+    });
+    if (heading.dataset.original) heading.textContent = heading.dataset.original;
+    document.title = originalTitle;
+
+    state[field] = checked.value;
+
+    if (nextPageId === 'page-checklist') renderChecklist();
+    goTo(nextPageId);
+    return false;
+  }
+
+  // ---- checklist rendering -------------------------------------------------
+  function buildGroups() {
+    var groups = [];
+    groups.push({ heading: "Documentos que siempre necesita", ids: TRAMITE_COMMON[state.tramite] || [] });
+
+    if (state.tramite === 'remodelacion') {
+      groups.push({ heading: "Porque pidió una Remodelación y/o Anexos", ids: TRAMITE_EXTRA.remodelacion });
+    }
+    if (state.titular === 'compania') {
+      groups.push({ heading: "Porque el titular es una compañía", ids: TITULAR_EXTRA.compania });
+    }
+    if (state.titular === 'fideicomiso') {
+      groups.push({ heading: "Porque el titular es un fideicomiso", ids: TITULAR_EXTRA.fideicomiso });
+    }
+    if (state.titular === 'fallecido') {
+      groups.push({ heading: "Porque el titular falleció", ids: TITULAR_EXTRA.fallecido });
+    }
+    if (state.zona === 'si') {
+      groups.push({ heading: "Porque el inmueble está en Gazcue o la Zona Colonial", ids: ZONA_EXTRA });
+    }
+    return groups;
+  }
+
+  function renderChecklist() {
+    document.getElementById('summary-tramite-name').textContent = TRAMITE_INFO[state.tramite].name;
+    document.getElementById('summary-titular-name').textContent = TITULAR_LABEL[state.titular];
+    document.getElementById('summary-zona-name').textContent = ZONA_LABEL[state.zona];
+    document.getElementById('usosuelo-callout').style.display = (state.tramite === 'usosuelo') ? 'block' : 'none';
+
+    var groups = buildGroups();
+    var html = '';
+    groups.forEach(function (group, gi) {
+      html += '<fieldset class="gobdo-fieldset"><legend><h2>' + group.heading + '</h2></legend>';
+      group.ids.forEach(function (docId) {
+        var d = DOCS[docId];
+        var inputId = 'doc-' + docId;
+        var noteId = inputId + '-note';
+        var tagId = inputId + '-tag';
+        var describedBy = d.tag ? (noteId + ' ' + tagId) : noteId;
+        html += '<div class="gobdo-check-row">'
+          + '<input type="checkbox" id="' + inputId + '" data-doc-id="' + docId + '" aria-describedby="' + describedBy + '">'
+          + '<div><label for="' + inputId + '">' + d.label + '</label>'
+          + '<p class="item-note" id="' + noteId + '">' + d.note + '</p>'
+          + (d.tag ? '<span class="gobdo-tag" id="' + tagId + '">' + d.tag + '</span>' : '')
+          + '</div></div>';
+      });
+      html += '</fieldset>';
+    });
+    document.getElementById('checklist-groups').innerHTML = html;
+
+    var total = document.querySelectorAll('#checklist-groups input[type="checkbox"]').length;
+    document.getElementById('progress-total').textContent = total;
+    updateProgress();
+
+    document.querySelectorAll('#checklist-groups input[type="checkbox"]').forEach(function (cb) {
+      cb.addEventListener('change', updateProgress);
+    });
+  }
+
+  function updateProgress() {
+    var boxes = document.querySelectorAll('#checklist-groups input[type="checkbox"]');
+    var checkedCount = document.querySelectorAll('#checklist-groups input[type="checkbox"]:checked').length;
+    document.getElementById('progress-count').textContent = checkedCount;
+    document.getElementById('progress-total').textContent = boxes.length;
+  }
+
+  // ---- summary page ---------------------------------------------------------
+  function goToSummary() {
+    var boxes = document.querySelectorAll('#checklist-groups input[type="checkbox"]');
+    var missing = [];
+    boxes.forEach(function (cb) {
+      if (!cb.checked) missing.push(DOCS[cb.dataset.docId].label);
+    });
+
+    var info = TRAMITE_INFO[state.tramite];
+    document.getElementById('summary-cost-tramite').textContent = info.name;
+    document.getElementById('summary-cost').textContent = info.cost;
+    document.getElementById('summary-time').textContent = info.time;
+
+    var card = document.getElementById('summary-card');
+    var heading = document.getElementById('summary-heading');
+    var missingBlock = document.getElementById('summary-missing-block');
+    var readyBlock = document.getElementById('summary-ready-block');
+    var missingList = document.getElementById('summary-missing-list');
+    var cta = document.getElementById('summary-cta');
+
+    if (missing.length === 0) {
+      card.classList.remove('gobdo-summary-missing');
+      card.classList.add('gobdo-summary-ready');
+      heading.textContent = 'Está listo para solicitar su ' + info.name;
+      missingBlock.style.display = 'none';
+      readyBlock.style.display = 'block';
+      cta.disabled = false;
+    } else {
+      card.classList.remove('gobdo-summary-ready');
+      card.classList.add('gobdo-summary-missing');
+      heading.textContent = (missing.length === 1) ? 'Le falta 1 documento' : 'Le faltan ' + missing.length + ' documentos';
+      missingList.innerHTML = missing.map(function (label) { return '<li>' + label + '</li>'; }).join('');
+      missingBlock.style.display = 'block';
+      readyBlock.style.display = 'none';
+    }
+
+    goTo('page-summary');
+  }
+</script>
+
+</body>
+</html>

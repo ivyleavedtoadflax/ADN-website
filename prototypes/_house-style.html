@@ -1,0 +1,133 @@
+<!-- SHARED gob.do / drimstack chrome + tokens. Inline this verbatim into each
+     prototype's <style> and body. Keeps the three prototypes visually identical
+     so testing measures the journey, not the chrome. -->
+
+<!-- ============ <style> block ============ -->
+<style id="gobdo-tokens">
+  :root {
+    --gobdo-navy: #003876;
+    --gobdo-navy-dark: #012a5a;
+    --gobdo-red: #D50910;
+    --gobdo-off-white: #F7F7F7;
+    --gobdo-charcoal: #212529;
+    --gobdo-white: #FFFFFF;
+    --gobdo-grey-light: #DDDDDD;
+    --gobdo-grey-mid: #777777;
+    --gobdo-error: #D50910;
+    --gobdo-green: #2CB34A;
+    --gobdo-blue-grey: #194A84;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Poppins", system-ui, sans-serif;
+    background: var(--gobdo-off-white); color: var(--gobdo-charcoal);
+    line-height: 1.55; font-size: 18px;
+  }
+  h1, h2, h3, h4 { color: var(--gobdo-navy); line-height: 1.25; }
+  h1 { font-size: 2rem; font-weight: 600; margin: 0 0 1rem; }
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 2rem 0 .75rem; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+  a { color: var(--gobdo-navy); }
+  .gobdo-official-banner {
+    background: var(--gobdo-navy-dark); color: #fff; font-size: .8rem;
+    text-align: center; padding: .35rem 1rem;
+  }
+  .gobdo-header {
+    background: var(--gobdo-navy); color: #fff; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: .9rem;
+  }
+  .gobdo-header .escudo {
+    width: 42px; height: 42px; border-radius: 50%; background: #fff;
+    color: var(--gobdo-navy); display: grid; place-items: center;
+    font-weight: 700; font-size: .8rem; flex: 0 0 auto;
+  }
+  .gobdo-header .titles small { display: block; opacity: .85; font-size: .75rem; }
+  .gobdo-header .titles strong { font-size: 1.05rem; font-weight: 600; }
+  .gobdo-status-banner {
+    font-size: .85rem; padding: .5rem 1.25rem; text-align: center;
+    background: #fff3cd; color: #664d03; border-bottom: 1px solid #ffe69c;
+  }
+  .drimstack-banner {
+    background: var(--gobdo-charcoal); color: #fff; font-size: .8rem;
+    padding: .5rem 1.25rem; display: flex; justify-content: space-between;
+    align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .drimstack-banner button {
+    background: transparent; color: #fff; border: 1px solid #fff;
+    border-radius: 4px; padding: .3rem .7rem; cursor: pointer; font-size: .78rem;
+  }
+  .gobdo-container { max-width: 760px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+  .gobdo-btn {
+    display: inline-block; background: var(--gobdo-green); color: #fff;
+    border: none; border-radius: 4px; padding: .7rem 1.4rem; font-size: 1.05rem;
+    font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit;
+  }
+  .gobdo-btn:hover { filter: brightness(.94); }
+  .gobdo-btn--secondary { background: #fff; color: var(--gobdo-navy); border: 2px solid var(--gobdo-navy); }
+  .gobdo-back { display: inline-block; margin-bottom: 1rem; color: var(--gobdo-navy); }
+  .gobdo-card {
+    background: #fff; border: 1px solid var(--gobdo-grey-light);
+    border-radius: 6px; padding: 1.1rem 1.25rem; margin: 1rem 0;
+  }
+  .gobdo-inset { border-left: 5px solid var(--gobdo-navy); padding: .25rem 0 .25rem 1rem; margin: 1rem 0; }
+  .gobdo-tag {
+    display: inline-block; background: var(--gobdo-navy); color: #fff;
+    font-size: .8rem; font-weight: 600; padding: .2rem .6rem; border-radius: 4px;
+  }
+  .gobdo-meta { display: flex; flex-wrap: wrap; gap: 1.25rem; margin: 1rem 0 1.5rem; }
+  .gobdo-meta div { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; padding: .6rem .9rem; min-width: 150px; }
+  .gobdo-meta small { display: block; color: var(--gobdo-grey-mid); font-size: .75rem; text-transform: uppercase; letter-spacing: .03em; }
+  .gobdo-meta strong { font-size: 1.1rem; color: var(--gobdo-navy); }
+  details.gobdo-details { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; margin: .6rem 0; padding: 0 1rem; }
+  details.gobdo-details > summary { cursor: pointer; padding: .8rem 0; font-weight: 600; color: var(--gobdo-navy); }
+  .gobdo-footer { background: var(--gobdo-navy); color: #fff; padding: 1.5rem 1.25rem; font-size: .85rem; }
+  .gobdo-footer a { color: #fff; margin-right: 1.25rem; }
+  .drimstack-assumptions {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 90vw);
+    background: #fff; border-left: 4px solid var(--gobdo-charcoal);
+    box-shadow: -6px 0 24px rgba(0,0,0,.2); padding: 1.25rem; overflow-y: auto;
+    transform: translateX(100%); transition: transform .25s ease; z-index: 50;
+  }
+  .drimstack-assumptions--open { transform: translateX(0); }
+  .drimstack-assumptions h2 { margin-top: 0; }
+  .drimstack-assumptions li { margin-bottom: .8rem; font-size: .9rem; }
+  .tag { font-size: .7rem; font-weight: 700; padding: .1rem .4rem; border-radius: 3px; background: #eee; color: #333; white-space: nowrap; }
+  .fake { background: #fff3cd; border: 1px dashed #997404; color: #664d03; font-size: .8rem; padding: .15rem .5rem; border-radius: 3px; }
+  .page { display: none; }
+  .page--active { display: block; }
+</style>
+
+<!-- ============ body chrome — top ============ -->
+<div class="gobdo-official-banner">Este es un servicio oficial del Gobierno de la República Dominicana</div>
+<header class="gobdo-header">
+  <span class="escudo">ADN</span>
+  <span class="titles">
+    <small>Ayuntamiento del Distrito Nacional · Planeamiento Urbano</small>
+    <strong>SERVICE_NAME_HERE</strong>
+  </span>
+</header>
+<div class="gobdo-status-banner">Versión alfa — esto es un prototipo, no lo use para trámites reales</div>
+<div class="drimstack-banner">
+  <span>drimstack prototype: BANNER_VARIANT_HERE</span>
+  <button onclick="toggleAssumptions()">Ver supuestos (N)</button>
+</div>
+
+<!-- ============ body chrome — footer ============ -->
+<footer class="gobdo-footer">
+  <p><a href="https://www.gob.do">Portal Único gob.do</a><a href="#">Punto GOB</a><a href="#">*462</a><a href="#">Política de privacidad</a></p>
+  <p style="opacity:.8">Ayuntamiento del Distrito Nacional · Prototipo drimstack · No es un servicio en vivo</p>
+</footer>
+
+<!-- ============ assumptions panel + script ============ -->
+<!-- <aside id="assumptions" class="drimstack-assumptions"> ...per-prototype list... </aside> -->
+<script>
+  function goTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('page--active'));
+    var el = document.getElementById(pageId);
+    if (el) el.classList.add('page--active');
+    window.scrollTo(0, 0);
+  }
+  function toggleAssumptions() {
+    document.getElementById('assumptions').classList.toggle('drimstack-assumptions--open');
+  }
+</script>

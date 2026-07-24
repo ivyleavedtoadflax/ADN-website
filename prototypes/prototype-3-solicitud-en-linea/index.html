@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Certificación de Uso de Suelo — gob.do (prototipo)</title>
+<!--
+  drimstack standards cited by this prototype
+
+  Standard 1 (meets user need) — replaces "digitalice, queme un CD y entregue
+    en persona" with a submission the citizen can complete online, unaided,
+    and a status page for the 30-45 day wait. Fixes REVIEW.md problems #3 and #4.
+  Standard 3 (everyone can use it) — WCAG 2.1 AA / NORTIC B2 patterns: error
+    summary + inline errors, aria-invalid/aria-describedby, labelled fields,
+    keyboard-reachable end to end, phone-first layout, no external requests.
+  Standard 4 (simple, relatable language) — plain "usted" Spanish, word-swap
+    list applied throughout, no lenguaje burocrático (source uses "el
+    solicitante" and "la institución se reserva el derecho..."; this
+    prototype does not).
+  Standard 5 (works first time) — one thing per page: Start, question pages,
+    Compruebe sus respuestas, Pago, Confirmación. "Volver" on every page but
+    Start. Confirmation gives reference, next step and timing.
+  Standard 7 (open, interoperable platforms) — GobID lookup (cédula/JCE,
+    RNC/DGII) instead of retyped identity fields; pasarela de pagos del
+    Estado (simulated) instead of a bespoke gateway.
+  GOV.UK Design Principles — 2 Do less (reuse GobID/pasarela, no new
+    chrome), 4 Do the hard work to make it simple (upload flow replaces
+    CD-burning), 9 Be consistent (gobdo- house-style tokens only, no
+    bespoke colours).
+
+  ALPHA prototype: clickable HTML, mock data, no backend, no network calls.
+  See the #assumptions panel for what still needs verifying before beta.
+-->
+<style id="gobdo-tokens">
+  :root {
+    --gobdo-navy: #003876;
+    --gobdo-navy-dark: #012a5a;
+    --gobdo-red: #D50910;
+    --gobdo-off-white: #F7F7F7;
+    --gobdo-charcoal: #212529;
+    --gobdo-white: #FFFFFF;
+    --gobdo-grey-light: #DDDDDD;
+    --gobdo-grey-mid: #777777;
+    --gobdo-error: #D50910;
+    --gobdo-green: #2CB34A;
+    --gobdo-blue-grey: #194A84;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Poppins", system-ui, sans-serif;
+    background: var(--gobdo-off-white); color: var(--gobdo-charcoal);
+    line-height: 1.55; font-size: 18px;
+  }
+  h1, h2, h3, h4 { color: var(--gobdo-navy); line-height: 1.25; }
+  h1 { font-size: 2rem; font-weight: 600; margin: 0 0 1rem; }
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 2rem 0 .75rem; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+  a { color: var(--gobdo-navy); }
+  .gobdo-official-banner {
+    background: var(--gobdo-navy-dark); color: #fff; font-size: .8rem;
+    text-align: center; padding: .35rem 1rem;
+  }
+  .gobdo-header {
+    background: var(--gobdo-navy); color: #fff; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: .9rem;
+  }
+  .gobdo-header .escudo {
+    width: 42px; height: 42px; border-radius: 50%; background: #fff;
+    color: var(--gobdo-navy); display: grid; place-items: center;
+    font-weight: 700; font-size: .8rem; flex: 0 0 auto;
+  }
+  .gobdo-header .titles small { display: block; opacity: .85; font-size: .75rem; }
+  .gobdo-header .titles strong { font-size: 1.05rem; font-weight: 600; }
+  .gobdo-status-banner {
+    font-size: .85rem; padding: .5rem 1.25rem; text-align: center;
+    background: #fff3cd; color: #664d03; border-bottom: 1px solid #ffe69c;
+  }
+  .drimstack-banner {
+    background: var(--gobdo-charcoal); color: #fff; font-size: .8rem;
+    padding: .5rem 1.25rem; display: flex; justify-content: space-between;
+    align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .drimstack-banner button {
+    background: transparent; color: #fff; border: 1px solid #fff;
+    border-radius: 4px; padding: .3rem .7rem; cursor: pointer; font-size: .78rem;
+  }
+  .gobdo-container { max-width: 760px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+  .gobdo-btn {
+    display: inline-block; background: var(--gobdo-green); color: #fff;
+    border: none; border-radius: 4px; padding: .7rem 1.4rem; font-size: 1.05rem;
+    font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit;
+  }
+  .gobdo-btn:hover { filter: brightness(.94); }
+  .gobdo-btn--secondary { background: #fff; color: var(--gobdo-navy); border: 2px solid var(--gobdo-navy); }
+  .gobdo-back { display: inline-block; margin-bottom: 1rem; color: var(--gobdo-navy); }
+  .gobdo-card {
+    background: #fff; border: 1px solid var(--gobdo-grey-light);
+    border-radius: 6px; padding: 1.1rem 1.25rem; margin: 1rem 0;
+  }
+  .gobdo-inset { border-left: 5px solid var(--gobdo-navy); padding: .25rem 0 .25rem 1rem; margin: 1rem 0; }
+  .gobdo-tag {
+    display: inline-block; background: var(--gobdo-navy); color: #fff;
+    font-size: .8rem; font-weight: 600; padding: .2rem .6rem; border-radius: 4px;
+  }
+  .gobdo-meta { display: flex; flex-wrap: wrap; gap: 1.25rem; margin: 1rem 0 1.5rem; }
+  .gobdo-meta div { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; padding: .6rem .9rem; min-width: 150px; }
+  .gobdo-meta small { display: block; color: var(--gobdo-grey-mid); font-size: .75rem; text-transform: uppercase; letter-spacing: .03em; }
+  .gobdo-meta strong { font-size: 1.1rem; color: var(--gobdo-navy); }
+  details.gobdo-details { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; margin: .6rem 0; padding: 0 1rem; }
+  details.gobdo-details > summary { cursor: pointer; padding: .8rem 0; font-weight: 600; color: var(--gobdo-navy); }
+  .gobdo-footer { background: var(--gobdo-navy); color: #fff; padding: 1.5rem 1.25rem; font-size: .85rem; }
+  .gobdo-footer a { color: #fff; margin-right: 1.25rem; }
+  .drimstack-assumptions {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 90vw);
+    background: #fff; border-left: 4px solid var(--gobdo-charcoal);
+    box-shadow: -6px 0 24px rgba(0,0,0,.2); padding: 1.25rem; overflow-y: auto;
+    transform: translateX(100%); transition: transform .25s ease; z-index: 50;
+  }
+  .drimstack-assumptions--open { transform: translateX(0); }
+  .drimstack-assumptions h2 { margin-top: 0; }
+  .drimstack-assumptions li { margin-bottom: .8rem; font-size: .9rem; }
+  .tag { font-size: .7rem; font-weight: 700; padding: .1rem .4rem; border-radius: 3px; background: #eee; color: #333; white-space: nowrap; }
+  .fake { background: #fff3cd; border: 1px dashed #997404; color: #664d03; font-size: .8rem; padding: .15rem .5rem; border-radius: 3px; }
+  .page { display: none; }
+  .page--active { display: block; }
+</style>
+<style id="prototype-extra">
+  /* Built from the gobdo- primitives above — no new colours, same variables. */
+  .gobdo-skip-link {
+    position: absolute; left: -9999px; top: 0; background: #fff; color: var(--gobdo-navy);
+    padding: .6rem 1rem; z-index: 200; font-weight: 600; border-radius: 0 0 4px 0;
+  }
+  .gobdo-skip-link:focus { left: 0; }
+  .gobdo-visually-hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .gobdo-form-group { margin: 1.25rem 0; max-width: 480px; }
+  .gobdo-label { display: block; font-weight: 600; margin-bottom: .3rem; }
+  .gobdo-hint { display: block; color: var(--gobdo-grey-mid); font-size: .9rem; margin-bottom: .4rem; }
+  .gobdo-input, .gobdo-select {
+    width: 100%; padding: .65rem .75rem; border: 2px solid var(--gobdo-charcoal);
+    border-radius: 4px; font-size: 1rem; font-family: inherit; background: #fff;
+  }
+  .gobdo-input[type="file"] { border-style: dashed; padding: .55rem; }
+  .gobdo-input:focus, .gobdo-select:focus, .gobdo-btn:focus, a:focus {
+    outline: 3px solid var(--gobdo-blue-grey); outline-offset: 2px;
+  }
+  .gobdo-form-group--error .gobdo-input, .gobdo-form-group--error .gobdo-select {
+    border-color: var(--gobdo-error); border-width: 3px;
+  }
+  .gobdo-error-message { display: block; color: var(--gobdo-error); font-weight: 600; margin-top: .35rem; }
+  .gobdo-error-summary {
+    border: 3px solid var(--gobdo-error); border-radius: 6px; padding: 1rem 1.25rem;
+    margin: 0 0 1.5rem; background: #fff;
+  }
+  .gobdo-error-summary h2 { color: var(--gobdo-error); margin: 0 0 .5rem; font-size: 1.1rem; }
+  .gobdo-error-summary ul { margin: 0; padding-left: 1.2rem; }
+  .gobdo-error-summary a { color: var(--gobdo-error); font-weight: 600; }
+  .gobdo-loading { font-style: italic; color: var(--gobdo-grey-mid); padding: 1rem 0; }
+  .gobdo-summary-row {
+    display: flex; flex-wrap: wrap; gap: .4rem 1rem; justify-content: space-between;
+    align-items: flex-start; padding: .85rem 0; border-bottom: 1px solid var(--gobdo-grey-light);
+  }
+  .gobdo-summary-row dt { font-weight: 600; flex: 0 0 40%; margin: 0; }
+  .gobdo-summary-row dd { margin: 0; flex: 1 1 35%; }
+  .gobdo-summary-row dd.gobdo-summary-action { flex: 0 0 auto; text-align: right; }
+  .gobdo-summary-row ul { margin: 0; padding-left: 1.1rem; }
+  .gobdo-progress { list-style: none; margin: 1.25rem 0; padding: 0; border-left: 3px solid var(--gobdo-grey-light); }
+  .gobdo-progress__step { position: relative; padding: .1rem 0 1.35rem 1.5rem; }
+  .gobdo-progress__step::before {
+    content: ''; position: absolute; left: -9px; top: .3rem; width: 14px; height: 14px;
+    border-radius: 50%; background: #fff; border: 3px solid var(--gobdo-grey-mid);
+  }
+  .gobdo-progress__step--done::before { background: var(--gobdo-green); border-color: var(--gobdo-green); }
+  .gobdo-progress__step--current::before { background: var(--gobdo-navy); border-color: var(--gobdo-navy); }
+  .gobdo-progress__label { display: block; font-weight: 600; color: var(--gobdo-navy); }
+  .gobdo-upload-card h3 { margin-top: 0; }
+</style>
+</head>
+<body>
+<a class="gobdo-skip-link" href="#main-content">Saltar al contenido principal</a>
+
+<!-- ============ body chrome — top (verbatim from _house-style.html) ============ -->
+<div class="gobdo-official-banner">Este es un servicio oficial del Gobierno de la República Dominicana</div>
+<header class="gobdo-header">
+  <span class="escudo">ADN</span>
+  <span class="titles">
+    <small>Ayuntamiento del Distrito Nacional · Planeamiento Urbano</small>
+    <strong>Certificación de Uso de Suelo</strong>
+  </span>
+</header>
+<div class="gobdo-status-banner">Versión alfa — esto es un prototipo, no lo use para trámites reales</div>
+<div class="drimstack-banner">
+  <span>drimstack prototype: Variante 3 de 3 — Solicitud en línea y seguimiento</span>
+  <button onclick="toggleAssumptions()">Ver supuestos (11)</button>
+</div>
+
+<main class="gobdo-container" id="main-content" tabindex="-1">
+
+  <!-- ======================= 1. START ======================= -->
+  <section id="page-start" class="page page--active" aria-labelledby="start-heading">
+    <h1 id="start-heading" tabindex="-1">Certificación de Uso de Suelo</h1>
+    <p>Pida el documento que dice qué uso puede darle a un terreno en el Distrito Nacional: residencial, comercial, industrial, institucional o mixto.</p>
+
+    <div class="gobdo-meta">
+      <div><small>Costo</small><strong>RD$4,500</strong></div>
+      <div><small>Tiempo de respuesta</small><strong>30 a 45 días laborables</strong></div>
+      <div><small>Canal</small><strong>En línea</strong></div>
+    </div>
+
+    <div class="gobdo-inset">
+      <p><strong>Ahora puede hacer esta solicitud en línea.</strong> Ya no tiene que quemar sus documentos en un CD ni entregarlos en persona en la Dirección de Planeamiento Urbano.</p>
+    </div>
+
+    <h2>Qué necesita antes de empezar</h2>
+    <ul>
+      <li>Su cédula, o el RNC de su empresa</li>
+      <li>El número de título de propiedad del inmueble</li>
+      <li>Cinco documentos en PDF: título de propiedad, plano de mensura catastral, ubicación en Google Maps, poder notariado (si aplica) y documento de identidad</li>
+      <li>Una tarjeta para pagar RD$4,500</li>
+    </ul>
+
+    <p><a class="gobdo-btn" href="#" onclick="showPage('page-gobid'); return false;">Comenzar</a></p>
+  </section>
+
+  <!-- ======================= 2. GOBID IDENTITY LOOKUP ======================= -->
+  <section id="page-gobid" class="page" aria-labelledby="gobid-heading">
+    <a href="#" class="gobdo-back" onclick="showPage('page-start'); return false;">← Volver</a>
+    <div id="error-summary-gobid" class="gobdo-error-summary" role="alert" aria-labelledby="error-summary-gobid-heading" tabindex="-1" hidden></div>
+    <h1 id="gobid-heading" tabindex="-1">Confirme quién es usted</h1>
+    <p>Busque sus datos con su cédula o el RNC de su empresa. No tiene que escribir su nombre ni su dirección — los tomamos de sus datos oficiales.</p>
+
+    <form id="gobid-form" novalidate onsubmit="return validateGobid(event);">
+      <div class="gobdo-form-group">
+        <label class="gobdo-label" for="input-cedula-rnc">Cédula o RNC</label>
+        <span class="gobdo-hint" id="input-cedula-rnc-hint">Escriba su cédula (001-1234567-8) o el RNC de su empresa (9 dígitos).</span>
+        <input class="gobdo-input" type="text" id="input-cedula-rnc" name="cedula-rnc" inputmode="numeric" autocomplete="off" aria-describedby="input-cedula-rnc-hint">
+        <span class="gobdo-error-message" id="input-cedula-rnc-error" hidden></span>
+      </div>
+      <button class="gobdo-btn" type="submit">Buscar mis datos</button>
+    </form>
+
+    <div id="gobid-loading" class="gobdo-loading" role="status" aria-live="polite" hidden>Buscando sus datos…</div>
+
+    <div id="gobid-result" class="gobdo-card" hidden>
+      <h2 id="gobid-result-heading" tabindex="-1">Encontramos sus datos</h2>
+      <p><strong>María Altagracia Pérez Santos</strong> <span class="fake">dato de prueba</span></p>
+      <p>Cédula o RNC: <span id="gobid-result-id"></span></p>
+      <p>¿Es usted?</p>
+      <p>
+        <a class="gobdo-btn" href="#" onclick="showPage('page-inmueble'); return false;">Sí, soy yo</a>
+        <a class="gobdo-btn gobdo-btn--secondary" href="#" onclick="gobidNotMe(); return false;">No, no soy yo</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ======================= 3. DATOS DEL INMUEBLE ======================= -->
+  <section id="page-inmueble" class="page" aria-labelledby="inmueble-heading">
+    <a href="#" class="gobdo-back" onclick="showPage('page-gobid'); return false;">← Volver</a>
+    <div id="error-summary-inmueble" class="gobdo-error-summary" role="alert" aria-labelledby="error-summary-inmueble-heading" tabindex="-1" hidden></div>
+    <h1 id="inmueble-heading" tabindex="-1">Datos del inmueble</h1>
+    <p>Cuéntenos sobre el terreno o inmueble para el que pide la certificación.</p>
+
+    <form id="inmueble-form" novalidate onsubmit="return validateInmueble(event);">
+      <div class="gobdo-form-group">
+        <label class="gobdo-label" for="input-titulo">Número de título de propiedad</label>
+        <span class="gobdo-hint" id="input-titulo-hint">Está en su Certificado de Título.</span>
+        <input class="gobdo-input" type="text" id="input-titulo" name="titulo" autocomplete="off" aria-describedby="input-titulo-hint">
+        <span class="gobdo-error-message" id="input-titulo-error" hidden></span>
+      </div>
+
+      <div class="gobdo-form-group">
+        <label class="gobdo-label" for="input-provincia">Provincia</label>
+        <span class="gobdo-hint" id="input-provincia-hint">Elija dónde está el inmueble.</span>
+        <select class="gobdo-select" id="input-provincia" name="provincia" aria-describedby="input-provincia-hint">
+          <option>Azua</option>
+          <option>Bahoruco</option>
+          <option>Barahona</option>
+          <option>Dajabón</option>
+          <option selected>Distrito Nacional</option>
+          <option>Duarte</option>
+          <option>El Seibo</option>
+          <option>Elías Piña</option>
+          <option>Espaillat</option>
+          <option>Hato Mayor</option>
+          <option>Hermanas Mirabal</option>
+          <option>Independencia</option>
+          <option>La Altagracia</option>
+          <option>La Romana</option>
+          <option>La Vega</option>
+          <option>María Trinidad Sánchez</option>
+          <option>Monseñor Nouel</option>
+          <option>Monte Cristi</option>
+          <option>Monte Plata</option>
+          <option>Pedernales</option>
+          <option>Peravia</option>
+          <option>Puerto Plata</option>
+          <option>Samaná</option>
+          <option>San Cristóbal</option>
+          <option>San José de Ocoa</option>
+          <option>San Juan</option>
+          <option>San Pedro de Macorís</option>
+          <option>Sánchez Ramírez</option>
+          <option>Santiago</option>
+          <option>Santiago Rodríguez</option>
+          <option>Santo Domingo</option>
+          <option>Valverde</option>
+        </select>
+        <span class="gobdo-error-message" id="input-provincia-error" hidden></span>
+      </div>
+
+      <button class="gobdo-btn" type="submit">Continuar</button>
+    </form>
+  </section>
+
+  <!-- ======================= 4. SUBIR DOCUMENTOS ======================= -->
+  <section id="page-documentos" class="page" aria-labelledby="documentos-heading">
+    <a href="#" class="gobdo-back" onclick="showPage('page-inmueble'); return false;">← Volver</a>
+    <div id="error-summary-documentos" class="gobdo-error-summary" role="alert" aria-labelledby="error-summary-documentos-heading" tabindex="-1" hidden></div>
+    <h1 id="documentos-heading" tabindex="-1">Suba sus documentos</h1>
+
+    <div class="gobdo-inset">
+      <p>Ya no necesita quemar un CD ni venir en persona — suba los documentos aquí. Cada uno debe ser un PDF.</p>
+    </div>
+
+    <h2>Sus documentos</h2>
+
+    <form id="documentos-form" novalidate onsubmit="return validateDocumentos(event);">
+
+      <div class="gobdo-card gobdo-upload-card">
+        <h3>Título de propiedad</h3>
+        <div class="gobdo-form-group">
+          <label class="gobdo-label" for="doc-titulo">Suba el archivo</label>
+          <span class="gobdo-hint" id="doc-titulo-hint">El título de propiedad del inmueble. Si el dueño es una empresa, junte también el Registro Mercantil vigente y el Acta de Asamblea de menos de un año, todo en un solo PDF.</span>
+          <input class="gobdo-input" type="file" id="doc-titulo" name="doc-titulo" accept="application/pdf" aria-describedby="doc-titulo-hint">
+          <span class="gobdo-error-message" id="doc-titulo-error" hidden></span>
+        </div>
+      </div>
+
+      <div class="gobdo-card gobdo-upload-card">
+        <h3>Plano de Mensura Catastral</h3>
+        <div class="gobdo-form-group">
+          <label class="gobdo-label" for="doc-plano">Suba el archivo</label>
+          <span class="gobdo-hint" id="doc-plano-hint">El plano de mensura catastral del terreno, en PDF.</span>
+          <input class="gobdo-input" type="file" id="doc-plano" name="doc-plano" accept="application/pdf" aria-describedby="doc-plano-hint">
+          <span class="gobdo-error-message" id="doc-plano-error" hidden></span>
+        </div>
+      </div>
+
+      <div class="gobdo-card gobdo-upload-card">
+        <h3>Ubicación en Google Maps</h3>
+        <div class="gobdo-form-group">
+          <label class="gobdo-label" for="doc-ubicacion">Suba el archivo</label>
+          <span class="gobdo-hint" id="doc-ubicacion-hint">Marque el lugar en Google Maps, tome una captura y conviértala a PDF.</span>
+          <input class="gobdo-input" type="file" id="doc-ubicacion" name="doc-ubicacion" accept="application/pdf" aria-describedby="doc-ubicacion-hint">
+          <span class="gobdo-error-message" id="doc-ubicacion-error" hidden></span>
+        </div>
+      </div>
+
+      <div class="gobdo-card gobdo-upload-card">
+        <h3>Poder notariado <span class="gobdo-tag">Opcional</span></h3>
+        <div class="gobdo-form-group">
+          <label class="gobdo-label" for="doc-poder">Suba el archivo</label>
+          <span class="gobdo-hint" id="doc-poder-hint">Solo si usted no es el dueño del inmueble: el poder notariado que lo autoriza a hacer esta solicitud.</span>
+          <input class="gobdo-input" type="file" id="doc-poder" name="doc-poder" accept="application/pdf" aria-describedby="doc-poder-hint">
+        </div>
+      </div>
+
+      <div class="gobdo-card gobdo-upload-card">
+        <h3>Documento de identidad</h3>
+        <div class="gobdo-form-group">
+          <label class="gobdo-label" for="doc-identidad">Suba el archivo</label>
+          <span class="gobdo-hint" id="doc-identidad-hint">Su cédula, o la del dueño del inmueble. Un PDF por cada persona.</span>
+          <input class="gobdo-input" type="file" id="doc-identidad" name="doc-identidad" accept="application/pdf" aria-describedby="doc-identidad-hint">
+          <span class="gobdo-error-message" id="doc-identidad-error" hidden></span>
+        </div>
+      </div>
+
+      <button class="gobdo-btn" type="submit">Continuar</button>
+    </form>
+  </section>
+
+  <!-- ======================= 5. COMPRUEBE SUS RESPUESTAS ======================= -->
+  <section id="page-resumen" class="page" aria-labelledby="resumen-heading">
+    <a href="#" class="gobdo-back" onclick="showPage('page-documentos'); return false;">← Volver</a>
+    <h1 id="resumen-heading" tabindex="-1">Compruebe sus respuestas</h1>
+    <p>Revise que todo esté correcto antes de pagar.</p>
+
+    <dl>
+      <div class="gobdo-summary-row">
+        <dt>Identidad</dt>
+        <dd>María Altagracia Pérez Santos <span class="fake">dato de prueba</span></dd>
+        <dd class="gobdo-summary-action"><a href="#" onclick="showPage('page-gobid'); return false;">Cambiar<span class="gobdo-visually-hidden"> identidad</span></a></dd>
+      </div>
+      <div class="gobdo-summary-row">
+        <dt>Título de propiedad</dt>
+        <dd id="resumen-titulo"></dd>
+        <dd class="gobdo-summary-action"><a href="#" onclick="showPage('page-inmueble'); return false;">Cambiar<span class="gobdo-visually-hidden"> título de propiedad</span></a></dd>
+      </div>
+      <div class="gobdo-summary-row">
+        <dt>Provincia</dt>
+        <dd id="resumen-provincia"></dd>
+        <dd class="gobdo-summary-action"><a href="#" onclick="showPage('page-inmueble'); return false;">Cambiar<span class="gobdo-visually-hidden"> provincia</span></a></dd>
+      </div>
+      <div class="gobdo-summary-row">
+        <dt>Documentos</dt>
+        <dd><ul id="resumen-documentos"></ul></dd>
+        <dd class="gobdo-summary-action"><a href="#" onclick="showPage('page-documentos'); return false;">Cambiar<span class="gobdo-visually-hidden"> documentos</span></a></dd>
+      </div>
+      <div class="gobdo-summary-row">
+        <dt>Costo</dt>
+        <dd>RD$4,500</dd>
+        <dd class="gobdo-summary-action"></dd>
+      </div>
+    </dl>
+
+    <p><a class="gobdo-btn" href="#" onclick="goToPago(event);">Confirmar y pagar</a></p>
+  </section>
+
+  <!-- ======================= 6. PAGO ======================= -->
+  <section id="page-pago" class="page" aria-labelledby="pago-heading">
+    <a href="#" class="gobdo-back" onclick="showPage('page-resumen'); return false;">← Volver</a>
+    <h1 id="pago-heading" tabindex="-1">Pague la solicitud</h1>
+
+    <div class="gobdo-inset">
+      <p><span class="fake">Este pago es simulado</span> — en el servicio real se conecta con la pasarela de pagos del Estado, no con un cobro aparte de este trámite.</p>
+    </div>
+
+    <div class="gobdo-meta">
+      <div><small>Total a pagar</small><strong>RD$4,500</strong></div>
+    </div>
+
+    <div id="pago-form">
+      <p><a class="gobdo-btn" href="#" onclick="simulatePayment(event);">Pagar RD$4,500 (simulado)</a></p>
+    </div>
+
+    <div id="pago-loading" class="gobdo-loading" role="status" aria-live="polite" hidden>Procesando su pago…</div>
+  </section>
+
+  <!-- ======================= 7. CONFIRMACIÓN ======================= -->
+  <section id="page-confirmacion" class="page" aria-labelledby="confirmacion-heading">
+    <a href="#" class="gobdo-back" onclick="showPage('page-start'); return false;">← Volver al inicio</a>
+    <h1 id="confirmacion-heading" tabindex="-1">Solicitud enviada</h1>
+
+    <div class="gobdo-card">
+      <p>Número de referencia</p>
+      <p><strong class="fake">USO-2026-004821 (dato de prueba)</strong></p>
+
+      <h2>Qué sigue</h2>
+      <p>Vamos a revisar sus documentos en la Dirección de Planeamiento Urbano.</p>
+
+      <h2>Cuánto tiempo toma</h2>
+      <p>Entre 30 y 45 días laborables.</p>
+
+      <p>Le avisamos por correo y por mensaje de texto (SMS) cuando haya novedades. No tiene que llamar ni venir a preguntar.</p>
+    </div>
+
+    <p><a class="gobdo-btn" href="#" onclick="showPage('page-seguimiento'); return false;">Siga su solicitud en línea</a></p>
+  </section>
+
+  <!-- ======================= 8. SEGUIMIENTO DE SOLICITUD ======================= -->
+  <section id="page-seguimiento" class="page" aria-labelledby="seguimiento-heading">
+    <a href="#" class="gobdo-back" onclick="showPage('page-confirmacion'); return false;">← Volver a la confirmación</a>
+    <h1 id="seguimiento-heading" tabindex="-1">Seguimiento de su solicitud</h1>
+    <p>Solicitud <strong class="fake">USO-2026-004821 (dato de prueba)</strong></p>
+
+    <ol class="gobdo-progress">
+      <li class="gobdo-progress__step gobdo-progress__step--done">
+        <span class="gobdo-progress__label">Recibida</span>
+        <span class="fake">20 de julio de 2026 — dato de prueba</span>
+      </li>
+      <li class="gobdo-progress__step gobdo-progress__step--current">
+        <span class="gobdo-progress__label">En revisión — Dirección de Planeamiento Urbano <span class="gobdo-tag">Paso actual</span></span>
+        <span class="fake">Desde el 22 de julio de 2026 — dato de prueba</span>
+      </li>
+      <li class="gobdo-progress__step">
+        <span class="gobdo-progress__label">Observaciones (si aplica)</span>
+        <span class="gobdo-hint">Le avisaremos si necesitamos algo más de usted.</span>
+      </li>
+      <li class="gobdo-progress__step">
+        <span class="gobdo-progress__label">Aprobada — certificado listo</span>
+      </li>
+    </ol>
+
+    <p>Le avisamos por mensaje de texto (SMS) y correo electrónico cada vez que su solicitud avance. No tiene que llamar ni venir a la Dirección a preguntar.</p>
+    <p>Cualquier persona que usted autorice puede seguir esta solicitud, no solo el dueño del inmueble.</p>
+
+    <p><a class="gobdo-btn gobdo-btn--secondary" href="#" onclick="showPage('page-start'); return false;">Volver al inicio</a></p>
+  </section>
+
+</main>
+
+<!-- ============ body chrome — footer (verbatim from _house-style.html) ============ -->
+<footer class="gobdo-footer">
+  <p><a href="https://www.gob.do">Portal Único gob.do</a><a href="#">Punto GOB</a><a href="#">*462</a><a href="#">Política de privacidad</a></p>
+  <p style="opacity:.8">Ayuntamiento del Distrito Nacional · Prototipo drimstack · No es un servicio en vivo</p>
+</footer>
+
+<!-- ============ assumptions panel ============ -->
+<aside id="assumptions" class="drimstack-assumptions">
+  <h2>Supuestos de este prototipo (11)</h2>
+  <p>Antes de pasar a beta, hay que comprobar cada uno de estos con la persona o el equipo indicado.</p>
+  <ul>
+    <li><span class="tag">VERIFY WITH OGTIC</span> Asumimos que el pago en línea puede conectarse a la pasarela de pagos del Estado para este trámite. No hay confirmación técnica de que esa integración esté lista para el Ayuntamiento del Distrito Nacional.</li>
+    <li><span class="tag">VERIFY WITH POLICY</span> Asumimos que la normativa permite recibir el expediente completo solo en digital, sin el CD físico que pide el proceso actual. Hay que confirmar si algún reglamento interno de Planeamiento Urbano todavía exige el soporte físico.</li>
+    <li><span class="tag">VERIFY WITH OGTIC</span> Asumimos que GobID (cédula vía JCE, RNC vía DGII) está disponible y cubre a las personas y empresas que usan este trámite. No hay confirmación de que esta integración esté activa para el ADN.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Asumimos que la Dirección de Planeamiento Urbano tiene, o puede tener, un sistema para recibir y organizar los documentos digitales. Hoy el proceso se basa en CDs físicos entregados a mano.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Este prototipo cobra antes de enviar la solicitud. El proceso actual cobra en caja, de forma presencial, después de revisar la solicitud. Hay que confirmar con la institución si puede aceptar el pago por adelantado.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Asumimos que Planeamiento Urbano tiene, o puede construir, un sistema de avisos por SMS y correo. Hoy no existe ningún aviso automático durante los 30 a 45 días de espera.</li>
+    <li><span class="tag">VERIFY WITH POLICY</span> Este prototipo deja que una persona autorizada por el dueño siga la solicitud. La regla actual dice que el seguimiento es "de manera personal única y exclusivamente por el propietario o solicitante". Hay que confirmar si se puede cambiar esa regla.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Los pasos del seguimiento (Recibida, En revisión, Observaciones, Aprobada) son una propuesta de drimstack. No están confirmados contra el proceso interno real de Planeamiento Urbano.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Asumimos que el poder notariado solo hace falta cuando quien solicita no es el dueño del inmueble. Hay que confirmar esta regla con la institución.</li>
+    <li><span class="tag">VERIFY WITH DATA</span> No hay un límite de tamaño o de formato definido para los PDF que se suben. Hay que fijar ese límite antes de construir el servicio real.</li>
+    <li><span class="tag">KNOWN GAP</span> Este prototipo cubre el camino común. No modela los casos especiales del contenido original: heredero fallecido, fideicomiso, o la no objeción de la Dirección Nacional de Patrimonio Monumental para Gazcue y la Zona Colonial. Esos casos se tratan en el prototipo 2 (la lista de "reúna estos documentos").</li>
+  </ul>
+</aside>
+
+<script>
+  // ============ shared drimstack script (verbatim from _house-style.html) ============
+  function goTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('page--active'));
+    var el = document.getElementById(pageId);
+    if (el) el.classList.add('page--active');
+    window.scrollTo(0, 0);
+  }
+  function toggleAssumptions() {
+    document.getElementById('assumptions').classList.toggle('drimstack-assumptions--open');
+  }
+
+  // ============ prototype-3 logic ============
+  var SITE_SUFFIX = 'gob.do (prototipo)';
+  var pageTitles = {
+    'page-start': 'Certificación de Uso de Suelo',
+    'page-gobid': 'Confirme quién es usted',
+    'page-inmueble': 'Datos del inmueble',
+    'page-documentos': 'Suba sus documentos',
+    'page-resumen': 'Compruebe sus respuestas',
+    'page-pago': 'Pague la solicitud',
+    'page-confirmacion': 'Solicitud enviada',
+    'page-seguimiento': 'Seguimiento de su solicitud'
+  };
+  var pageFields = {
+    gobid: ['input-cedula-rnc'],
+    inmueble: ['input-titulo', 'input-provincia'],
+    documentos: ['doc-titulo', 'doc-plano', 'doc-ubicacion', 'doc-identidad']
+  };
+
+  // Wraps the shared goTo(): sets the per-page title, moves focus to the
+  // new page's h1 (WCAG 2.1 AA focus-on-route-change), and runs any
+  // page-specific setup (the resumen page needs its values populated).
+  function showPage(id) {
+    goTo(id);
+    document.title = (pageTitles[id] || '') + ' — ' + SITE_SUFFIX;
+    var target = document.getElementById(id);
+    if (!target) return;
+    var heading = target.querySelector('h1');
+    if (heading) heading.focus();
+    if (id === 'page-resumen') populateSummary();
+  }
+
+  function goToPago(e) {
+    if (e) e.preventDefault();
+    document.getElementById('pago-form').hidden = false;
+    document.getElementById('pago-loading').hidden = true;
+    showPage('page-pago');
+    return false;
+  }
+
+  function setFieldError(fieldId, message) {
+    var field = document.getElementById(fieldId);
+    var msgEl = document.getElementById(fieldId + '-error');
+    var hintEl = document.getElementById(fieldId + '-hint');
+    if (msgEl) { msgEl.textContent = message; msgEl.hidden = false; }
+    if (field) {
+      field.setAttribute('aria-invalid', 'true');
+      field.setAttribute('aria-describedby', (hintEl ? fieldId + '-hint ' : '') + fieldId + '-error');
+      var group = field.closest('.gobdo-form-group');
+      if (group) group.classList.add('gobdo-form-group--error');
+    }
+  }
+
+  function clearFieldError(fieldId) {
+    var field = document.getElementById(fieldId);
+    var msgEl = document.getElementById(fieldId + '-error');
+    var hintEl = document.getElementById(fieldId + '-hint');
+    if (msgEl) { msgEl.hidden = true; msgEl.textContent = ''; }
+    if (field) {
+      field.removeAttribute('aria-invalid');
+      if (hintEl) { field.setAttribute('aria-describedby', fieldId + '-hint'); }
+      else { field.removeAttribute('aria-describedby'); }
+      var group = field.closest('.gobdo-form-group');
+      if (group) group.classList.remove('gobdo-form-group--error');
+    }
+  }
+
+  function clearErrors(shortKey) {
+    var summary = document.getElementById('error-summary-' + shortKey);
+    if (summary) { summary.hidden = true; summary.innerHTML = ''; }
+    (pageFields[shortKey] || []).forEach(clearFieldError);
+  }
+
+  function showErrors(shortKey, errors) {
+    var summary = document.getElementById('error-summary-' + shortKey);
+    var h2 = document.createElement('h2');
+    h2.id = 'error-summary-' + shortKey + '-heading';
+    h2.textContent = 'Hay un problema';
+    var list = document.createElement('ul');
+
+    errors.forEach(function (err) {
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + err.id;
+      a.textContent = err.message;
+      a.addEventListener('click', function (evt) {
+        evt.preventDefault();
+        var field = document.getElementById(err.id);
+        if (field) field.focus();
+      });
+      li.appendChild(a);
+      list.appendChild(li);
+      setFieldError(err.id, err.message);
+    });
+
+    summary.innerHTML = '';
+    summary.appendChild(h2);
+    summary.appendChild(list);
+    summary.hidden = false;
+    document.title = 'Error: ' + (pageTitles['page-' + shortKey] || '') + ' — ' + SITE_SUFFIX;
+    summary.focus();
+  }
+
+  // ---- page 2: GobID lookup ----
+  function validateGobid(e) {
+    e.preventDefault();
+    var input = document.getElementById('input-cedula-rnc');
+    var value = input.value.trim();
+    var cedulaPattern = /^\d{3}-\d{7}-\d{1}$/;
+    var rncPattern = /^\d{9}$/;
+    var errors = [];
+    if (!value) {
+      errors.push({ id: 'input-cedula-rnc', message: 'Escriba su cédula o el RNC de su empresa.' });
+    } else if (!cedulaPattern.test(value) && !rncPattern.test(value)) {
+      errors.push({ id: 'input-cedula-rnc', message: 'Use el formato 001-1234567-8 para su cédula, o 9 dígitos para el RNC.' });
+    }
+    if (errors.length) { showErrors('gobid', errors); return false; }
+
+    clearErrors('gobid');
+    document.getElementById('gobid-form').hidden = true;
+    document.getElementById('gobid-loading').hidden = false;
+    setTimeout(function () {
+      document.getElementById('gobid-loading').hidden = true;
+      document.getElementById('gobid-result-id').textContent = value;
+      var result = document.getElementById('gobid-result');
+      result.hidden = false;
+      document.getElementById('gobid-result-heading').focus();
+    }, 900);
+    return false;
+  }
+
+  function gobidNotMe() {
+    document.getElementById('gobid-result').hidden = true;
+    document.getElementById('gobid-form').hidden = false;
+    var input = document.getElementById('input-cedula-rnc');
+    input.value = '';
+    input.focus();
+  }
+
+  // ---- page 3: datos del inmueble ----
+  function validateInmueble(e) {
+    e.preventDefault();
+    var titulo = document.getElementById('input-titulo');
+    var provincia = document.getElementById('input-provincia');
+    var errors = [];
+    if (!titulo.value.trim()) {
+      errors.push({ id: 'input-titulo', message: 'Escriba el número de título de propiedad.' });
+    }
+    if (!provincia.value) {
+      errors.push({ id: 'input-provincia', message: 'Elija una provincia.' });
+    }
+    if (errors.length) { showErrors('inmueble', errors); return false; }
+    clearErrors('inmueble');
+    showPage('page-documentos');
+    return false;
+  }
+
+  // ---- page 4: subir documentos ----
+  function validateDocumentos(e) {
+    e.preventDefault();
+    var required = [
+      { id: 'doc-titulo', message: 'Suba el título de propiedad en PDF.' },
+      { id: 'doc-plano', message: 'Suba el plano de mensura catastral en PDF.' },
+      { id: 'doc-ubicacion', message: 'Suba la ubicación del inmueble en PDF.' },
+      { id: 'doc-identidad', message: 'Suba su documento de identidad en PDF.' }
+    ];
+    var errors = required.filter(function (item) {
+      var input = document.getElementById(item.id);
+      return !input.files || input.files.length === 0;
+    });
+    if (errors.length) { showErrors('documentos', errors); return false; }
+    clearErrors('documentos');
+    showPage('page-resumen');
+    return false;
+  }
+
+  // ---- page 5: compruebe sus respuestas ----
+  function populateSummary() {
+    var titulo = document.getElementById('input-titulo').value.trim();
+    document.getElementById('resumen-titulo').textContent = titulo || '(sin dato)';
+
+    var provinciaSelect = document.getElementById('input-provincia');
+    document.getElementById('resumen-provincia').textContent = provinciaSelect.options[provinciaSelect.selectedIndex].text;
+
+    var docs = [
+      { id: 'doc-titulo', label: 'Título de propiedad' },
+      { id: 'doc-plano', label: 'Plano de Mensura Catastral' },
+      { id: 'doc-ubicacion', label: 'Ubicación en Google Maps' },
+      { id: 'doc-poder', label: 'Poder notariado' },
+      { id: 'doc-identidad', label: 'Documento de identidad' }
+    ];
+    var list = document.getElementById('resumen-documentos');
+    list.innerHTML = '';
+    docs.forEach(function (doc) {
+      var input = document.getElementById(doc.id);
+      var li = document.createElement('li');
+      if (input.files && input.files.length > 0) {
+        li.textContent = doc.label + ': ' + input.files[0].name;
+      } else {
+        li.textContent = doc.label + ': no subido' + (doc.id === 'doc-poder' ? ' (opcional)' : '');
+      }
+      list.appendChild(li);
+    });
+  }
+
+  // ---- page 6: pago (simulado) ----
+  function simulatePayment(e) {
+    if (e) e.preventDefault();
+    document.getElementById('pago-form').hidden = true;
+    document.getElementById('pago-loading').hidden = false;
+    setTimeout(function () {
+      document.getElementById('pago-loading').hidden = true;
+      showPage('page-confirmacion');
+    }, 900);
+    return false;
+  }
+</script>
+</body>
+</html>

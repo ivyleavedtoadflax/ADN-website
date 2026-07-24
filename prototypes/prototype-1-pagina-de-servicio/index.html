@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solicitar la Certificación de Uso de Suelo | Ayuntamiento del Distrito Nacional</title>
+
+<!--
+  drimstack prototype — Certificación de Uso de Suelo (service page, rebuilt)
+  Fixes REVIEW.md problems #1, #2, #5, #6, #7 (see /home/matt/repos/ADN-scraper/REVIEW.md).
+
+  Standards cited:
+    Standard 1  (meet user needs)          — this rebuild is grounded in the ADN
+                                              content review, not yet tested with
+                                              citizens; every gap is logged in the
+                                              assumptions panel, not hidden.
+    Standard 3  (everyone can use it)      — WCAG 2.1 AA / NORTIC B2: native
+                                              <details>/<summary> disclosure (no
+                                              custom ARIA needed), skip link, one
+                                              font family, works on a phone.
+    Standard 4  (simple, relatable language) — plain Spanish, usted, the
+                                              house-style word-swap list applied
+                                              throughout (efectuar→pagar,
+                                              suministrar→dar, "la institución se
+                                              reserva el derecho"→plain phrasing).
+    Standard 5  (works the first time)     — headings are bound to their content
+                                              (problem #1), requirements appear
+                                              once (problem #2), cost and time are
+                                              visible before the citizen reads a
+                                              word of the requirements (problem #6).
+    Standard 7  (open, interoperable platforms) — flagged in the assumptions panel:
+                                              GobID (cédula/JCE) and X-Road could
+                                              replace several of the document
+                                              uploads below; not built here, but
+                                              named so the next iteration can.
+
+  GOV.UK design principles drawn on: 2 Do less (one requirements list, not two),
+  4 Do the hard work to make it simple (edge cases behind progressive disclosure
+  instead of one legalese paragraph), 6 This is for everyone, 9 Be consistent
+  not uniform (gobdo- tokens only, no bespoke chrome).
+
+  Scope note: this prototype does NOT fix REVIEW.md problems #3 (CD-in-person
+  hand-off) or #4 (100% presencial, owner-only follow-up). Those are addressed
+  in prototype 3 (online submission + status). This page shows today's real
+  process, rewritten in plain language, so testers see the actual gap rather
+  than a fixed process that doesn't exist yet.
+
+  Font note: the shared stylesheet specifies Poppins with a system-ui fallback.
+  This prototype does not load the Google Fonts file, to keep the page fully
+  self-contained and fast on a throttled connection (Standard 3, GOV.UK
+  principle 7 "understand context" — a citizen on 3G shouldn't wait on a font
+  request for a government form). The same choice should be applied to
+  prototypes 2 and 3 so all three render identically. Flagged, not hidden.
+-->
+
+<!-- ============ <style> block — SHARED, copied verbatim from _house-style.html ============ -->
+<style id="gobdo-tokens">
+  :root {
+    --gobdo-navy: #003876;
+    --gobdo-navy-dark: #012a5a;
+    --gobdo-red: #D50910;
+    --gobdo-off-white: #F7F7F7;
+    --gobdo-charcoal: #212529;
+    --gobdo-white: #FFFFFF;
+    --gobdo-grey-light: #DDDDDD;
+    --gobdo-grey-mid: #777777;
+    --gobdo-error: #D50910;
+    --gobdo-green: #2CB34A;
+    --gobdo-blue-grey: #194A84;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Poppins", system-ui, sans-serif;
+    background: var(--gobdo-off-white); color: var(--gobdo-charcoal);
+    line-height: 1.55; font-size: 18px;
+  }
+  h1, h2, h3, h4 { color: var(--gobdo-navy); line-height: 1.25; }
+  h1 { font-size: 2rem; font-weight: 600; margin: 0 0 1rem; }
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 2rem 0 .75rem; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+  a { color: var(--gobdo-navy); }
+  .gobdo-official-banner {
+    background: var(--gobdo-navy-dark); color: #fff; font-size: .8rem;
+    text-align: center; padding: .35rem 1rem;
+  }
+  .gobdo-header {
+    background: var(--gobdo-navy); color: #fff; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: .9rem;
+  }
+  .gobdo-header .escudo {
+    width: 42px; height: 42px; border-radius: 50%; background: #fff;
+    color: var(--gobdo-navy); display: grid; place-items: center;
+    font-weight: 700; font-size: .8rem; flex: 0 0 auto;
+  }
+  .gobdo-header .titles small { display: block; opacity: .85; font-size: .75rem; }
+  .gobdo-header .titles strong { font-size: 1.05rem; font-weight: 600; }
+  .gobdo-status-banner {
+    font-size: .85rem; padding: .5rem 1.25rem; text-align: center;
+    background: #fff3cd; color: #664d03; border-bottom: 1px solid #ffe69c;
+  }
+  .drimstack-banner {
+    background: var(--gobdo-charcoal); color: #fff; font-size: .8rem;
+    padding: .5rem 1.25rem; display: flex; justify-content: space-between;
+    align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .drimstack-banner button {
+    background: transparent; color: #fff; border: 1px solid #fff;
+    border-radius: 4px; padding: .3rem .7rem; cursor: pointer; font-size: .78rem;
+  }
+  .gobdo-container { max-width: 760px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+  .gobdo-btn {
+    display: inline-block; background: var(--gobdo-green); color: #fff;
+    border: none; border-radius: 4px; padding: .7rem 1.4rem; font-size: 1.05rem;
+    font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit;
+  }
+  .gobdo-btn:hover { filter: brightness(.94); }
+  .gobdo-btn--secondary { background: #fff; color: var(--gobdo-navy); border: 2px solid var(--gobdo-navy); }
+  .gobdo-back { display: inline-block; margin-bottom: 1rem; color: var(--gobdo-navy); }
+  .gobdo-card {
+    background: #fff; border: 1px solid var(--gobdo-grey-light);
+    border-radius: 6px; padding: 1.1rem 1.25rem; margin: 1rem 0;
+  }
+  .gobdo-inset { border-left: 5px solid var(--gobdo-navy); padding: .25rem 0 .25rem 1rem; margin: 1rem 0; }
+  .gobdo-tag {
+    display: inline-block; background: var(--gobdo-navy); color: #fff;
+    font-size: .8rem; font-weight: 600; padding: .2rem .6rem; border-radius: 4px;
+  }
+  .gobdo-meta { display: flex; flex-wrap: wrap; gap: 1.25rem; margin: 1rem 0 1.5rem; }
+  .gobdo-meta div { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; padding: .6rem .9rem; min-width: 150px; }
+  .gobdo-meta small { display: block; color: var(--gobdo-grey-mid); font-size: .75rem; text-transform: uppercase; letter-spacing: .03em; }
+  .gobdo-meta strong { font-size: 1.1rem; color: var(--gobdo-navy); }
+  details.gobdo-details { background: #fff; border: 1px solid var(--gobdo-grey-light); border-radius: 6px; margin: .6rem 0; padding: 0 1rem; }
+  details.gobdo-details > summary { cursor: pointer; padding: .8rem 0; font-weight: 600; color: var(--gobdo-navy); }
+  .gobdo-footer { background: var(--gobdo-navy); color: #fff; padding: 1.5rem 1.25rem; font-size: .85rem; }
+  .gobdo-footer a { color: #fff; margin-right: 1.25rem; }
+  .drimstack-assumptions {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 90vw);
+    background: #fff; border-left: 4px solid var(--gobdo-charcoal);
+    box-shadow: -6px 0 24px rgba(0,0,0,.2); padding: 1.25rem; overflow-y: auto;
+    transform: translateX(100%); transition: transform .25s ease; z-index: 50;
+  }
+  .drimstack-assumptions--open { transform: translateX(0); }
+  .drimstack-assumptions h2 { margin-top: 0; }
+  .drimstack-assumptions li { margin-bottom: .8rem; font-size: .9rem; }
+  .tag { font-size: .7rem; font-weight: 700; padding: .1rem .4rem; border-radius: 3px; background: #eee; color: #333; white-space: nowrap; }
+  .fake { background: #fff3cd; border: 1px dashed #997404; color: #664d03; font-size: .8rem; padding: .15rem .5rem; border-radius: 3px; }
+  .page { display: none; }
+  .page--active { display: block; }
+</style>
+
+<!-- ============ page-specific additions (NOT part of the shared partial) ============ -->
+<style id="page-additions">
+  /* Skip link — Standard 3 / WCAG 2.1 AA 2.4.1 Bypass Blocks. */
+  .skip-link {
+    position: absolute; left: -999px; top: auto; background: #fff;
+    color: var(--gobdo-navy); padding: .75rem 1rem; z-index: 100;
+    border-radius: 0 0 4px 0; font-weight: 600;
+  }
+  .skip-link:focus { left: 0; top: 0; }
+  /* Breadcrumb, small print inside sections, and lists inside the disclosure
+     panels — built from primitives already in the token set, not new colours. */
+  .gobdo-breadcrumb { font-size: .85rem; margin: 0 0 .75rem; color: var(--gobdo-grey-mid); }
+  .gobdo-breadcrumb a { color: var(--gobdo-navy); }
+  .gobdo-note { font-size: .9rem; color: var(--gobdo-grey-mid); margin: .5rem 0 1rem; }
+  details.gobdo-details ul, details.gobdo-details p { margin: .5rem 0 1rem; }
+  .gobdo-container ul { padding-left: 1.2rem; }
+  .gobdo-container li { margin-bottom: .6rem; }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+<!-- ============ body chrome — top, copied verbatim from _house-style.html ============ -->
+<div class="gobdo-official-banner">Este es un servicio oficial del Gobierno de la República Dominicana</div>
+<header class="gobdo-header">
+  <span class="escudo">ADN</span>
+  <span class="titles">
+    <small>Ayuntamiento del Distrito Nacional · Planeamiento Urbano</small>
+    <strong>Certificación de Uso de Suelo</strong>
+  </span>
+</header>
+<div class="gobdo-status-banner">Versión alfa — esto es un prototipo, no lo use para trámites reales</div>
+<div class="drimstack-banner">
+  <span>drimstack prototype: Variante 1 de 3 — Página de servicio reconstruida</span>
+  <button onclick="toggleAssumptions()">Ver supuestos (14)</button>
+</div>
+
+<!-- ============ main content ============ -->
+<main id="main" class="gobdo-container">
+
+  <p class="gobdo-breadcrumb">
+    <a href="#">gob.do</a> ›
+    <a href="#">Servicios de Planeamiento Urbano</a> ›
+    <span aria-current="page">Certificación de Uso de Suelo</span>
+  </p>
+
+  <h1>Solicitar la Certificación de Uso de Suelo</h1>
+
+  <div class="gobdo-meta">
+    <div><small>Costo</small><strong>RD$4,500</strong></div>
+    <div><small>Tiempo de respuesta</small><strong>30 a 45 días laborables</strong></div>
+    <div><small>Horario</small><strong>Lunes a viernes, 8:00 a.m. – 5:00 p.m.</strong></div>
+    <div><small>Canal</small><strong>Presencial</strong></div>
+  </div>
+
+  <!-- Heading map for maintainers (fixes REVIEW.md problem #1 — every heading
+       below is bound to real content; none render blank):
+         Descripción del Servicio        → "¿Qué es este trámite?"
+         A quién va dirigido             → "¿Quién puede solicitarlo?"
+         Requerimientos o requisitos     → "Qué necesita reunir" (common path)
+                                            + "Casos especiales" (edge cases,
+                                            split out per problem #7)
+         Procedimientos a seguir         → "Cómo se hace"
+         Horario / Costo / Tiempo / Canal → moved into the .gobdo-meta strip
+                                            above, per the brief (problem #6:
+                                            surface cost and time up front,
+                                            not buried at the bottom)
+         (closing "NOTA" paragraph)      → "Qué pasa después"
+  -->
+
+  <h2>¿Qué es este trámite?</h2>
+  <p>
+    Es el documento que dice cómo puede usarse un terreno o inmueble en el
+    Distrito Nacional: residencial, habitacional, comercial, industrial,
+    institucional, mixto, de servicios, entre otros.
+  </p>
+
+  <h2>¿Quién puede solicitarlo?</h2>
+  <p>
+    Puede solicitarlo cualquier persona. Si usted no es quien es dueño del
+    inmueble, necesita un poder notarizado que la persona propietaria le dé
+    para representarla en este trámite.
+  </p>
+
+  <h2>Qué necesita reunir</h2>
+  <p class="gobdo-note">
+    Digitalice cada documento en PDF — un archivo por documento, con un
+    nombre que lo identifique.
+  </p>
+  <ul>
+    <li><a href="#" class="fake" title="Enlace de muestra — no apunta al formulario real del ADN">Formulario de solicitud</a> lleno.</li>
+    <li>Título de propiedad, digitalizado. Si el propietario es una empresa, añada en el mismo PDF el Registro Mercantil vigente y el acta de la Asamblea (de menos de un año).</li>
+    <li>Plano de Mensura Catastral, digitalizado.</li>
+    <li>Ubicación del inmueble: use Google Maps, haga clic en el lugar exacto y convierta la imagen en PDF.</li>
+    <li>Poder notarizado del propietario o de los propietarios, si quien solicita no es quien es dueño — debe incluir los datos del título. Puede usar este <a href="#" class="fake" title="Enlace de muestra — no apunta al modelo real del ADN">modelo de poder de autorización</a> (persona física o empresa).</li>
+    <li>Documento de identidad del propietario y de quien solicita — un PDF por cada persona.</li>
+  </ul>
+
+  <h2>Casos especiales</h2>
+  <p class="gobdo-note">
+    Estos casos no aplican a la mayoría de las solicitudes. Ábralos solo si
+    le corresponden.
+  </p>
+
+  <details class="gobdo-details">
+    <summary>Su inmueble está en Gazcue o la Zona Colonial</summary>
+    <p>Añada el Certificado de No Objeción de la Dirección Nacional de Patrimonio Monumental (DNPM).</p>
+  </details>
+
+  <details class="gobdo-details">
+    <summary>La solicitud incluye más de un inmueble</summary>
+    <p>Use una Mensura Catastral unificada, firmada por un agrimensor.</p>
+  </details>
+
+  <details class="gobdo-details">
+    <summary>Tiene un acto de compra-venta definitivo</summary>
+    <p>Regístrelo en el Registro Civil del Ayuntamiento (o preséntelo con el sello de recibido de la Jurisdicción Inmobiliaria) y añádalo en un PDF. Incluya también, en otro PDF, el documento de identidad de quienes vendieron.</p>
+  </details>
+
+  <details class="gobdo-details">
+    <summary>El propietario falleció</summary>
+    <p>Reúna en PDF: la Determinación de Herederos, el Acta de Defunción, la identidad de los herederos (o el acta de nacimiento si alguno es menor de edad) y el poder de representación, si existe.</p>
+  </details>
+
+  <details class="gobdo-details">
+    <summary>El propietario es un fideicomiso</summary>
+    <p>Reúna en PDF el contrato del fideicomiso (con cualquier adéndum) y el acta de constitución del fideicomiso de la DGII. El poder de autorización lo firma la persona representante de la fiduciaria que aparece en el contrato.</p>
+  </details>
+
+  <h2>Cómo se hace</h2>
+  <ol>
+    <li>Descargue y llene el formulario de solicitud.</li>
+    <li>Reúna y escanee los documentos que le pedimos, uno por PDF.</li>
+    <li>Grabe los documentos en un CD y entréguelo, junto con el formulario, en la Dirección de Planeamiento Urbano.</li>
+    <li>Espere a que revisen su solicitud. Después de la revisión, pague RD$4,500 en la caja del Palacio Municipal del Ayuntamiento del Distrito Nacional.</li>
+    <li>Espere de 30 a 45 días laborables. Solo usted, si es el propietario o quien hizo la solicitud, puede dar seguimiento — y debe hacerlo en persona en la Dirección.</li>
+  </ol>
+  <p class="gobdo-note">
+    El tiempo de respuesta puede variar según los documentos que le pedimos y los que usted nos dé.
+  </p>
+
+  <h2>Qué pasa después</h2>
+  <p>
+    Si necesitamos otro documento para tramitar su solicitud, se lo
+    pediremos durante la revisión. Recibirá su certificación en la
+    Dirección de Planeamiento Urbano.
+  </p>
+
+  <h2>Contacto</h2>
+  <p>
+    Para dudas sobre este trámite, diríjase a la Dirección de Planeamiento
+    Urbano del Ayuntamiento del Distrito Nacional. También puede pedir
+    ayuda en un <a href="#">Punto GOB</a> o llamando al <a href="#">*462</a>.
+  </p>
+
+</main>
+
+<!-- ============ body chrome — footer, copied verbatim from _house-style.html ============ -->
+<footer class="gobdo-footer">
+  <p><a href="https://www.gob.do">Portal Único gob.do</a><a href="#">Punto GOB</a><a href="#">*462</a><a href="#">Política de privacidad</a></p>
+  <p style="opacity:.8">Ayuntamiento del Distrito Nacional · Prototipo drimstack · No es un servicio en vivo</p>
+</footer>
+
+<!-- ============ assumptions panel ============ -->
+<aside id="assumptions" class="drimstack-assumptions" aria-label="Supuestos del prototipo">
+  <button onclick="toggleAssumptions()" class="gobdo-btn gobdo-btn--secondary" style="float:right;" aria-label="Cerrar panel de supuestos">Cerrar</button>
+  <h2>Assumptions in this prototype</h2>
+  <p style="font-size:.85rem; color:var(--gobdo-grey-mid);">
+    Written for the team, not the citizen — this is why it's in English while
+    the page itself is in Spanish. Every assumption below is grounded in
+    REVIEW.md and the scraped source page; nothing here is invented data.
+  </p>
+  <ul>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Is RD$4,500 still the current fee? The content review is from July 2026; municipal tariffs change by resolution of the Concejo de Regidores and this page has no visible last-updated date.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Is "30 a 45 días laborables" the real turnaround today, or only the published target? No performance data was available to check it.</li>
+    <li><span class="tag">VERIFY WITH INSTITUCIÓN</span> Whether "a todo público" really means anyone can apply, or whether in practice only the owner or someone with a notarised poder can start the trámite. We wrote "puede solicitarlo cualquier persona… si usted no es dueño, necesita un poder" — that's our synthesis of the requirements list, not a sentence that appears as such in the original.</li>
+    <li><span class="tag">VERIFY WITH USERS</span> Whether citizens understand "Mensura Catastral," "agrimensor," and "Certificado de No Objeción de la DNPM" without a further explanatory hint. We used the terms as ADN uses them because that's what appears on the property documents citizens will be gathering.</li>
+    <li><span class="tag">VERIFY WITH USERS</span> Whether putting the five edge cases (fideicomiso, herencia, Gazcue/Zona Colonial, multiple properties, compra-venta) behind &lt;details&gt; accordions actually helps most applicants find the common path faster — or whether it hides something a meaningful minority need to see without a click.</li>
+    <li><span class="tag">VERIFY WITH USERS</span> Whether renaming the original section headings (Descripción del Servicio, A quién va dirigido, Procedimientos a seguir) to plain-language questions ("¿Qué es este trámite?", "¿Quién puede solicitarlo?", "Cómo se hace") helps citizens scan, or whether it breaks consistency with the other Planeamiento Urbano trámites that still use the bureaucratic labels — see GOV.UK Principle 9, be consistent not uniform.</li>
+    <li><span class="tag">VERIFY WITH POLICY</span> Whether submitting documents burned to a CD is a legal requirement of the trámite, or a technical convention of the current system with no policy basis. If it's the latter, it can be replaced by an upload (see prototype 3) without a regulatory change.</li>
+    <li><span class="tag">VERIFY WITH POLICY</span> Whether payment must happen presencial at the Palacio Municipal caja by rule, or whether it could move to the pasarela de pagos del Estado.</li>
+    <li><span class="tag">VERIFY WITH OGTIC</span> Whether ADN has a Security Server on the Plataforma de Interoperabilidad that could confirm the Título de Propiedad or Registro Mercantil directly, instead of the citizen uploading a scanned PDF (Standard 7).</li>
+    <li><span class="tag">VERIFY WITH OGTIC</span> Whether identity for the owner and the applicant could be confirmed through GobID (cédula via JCE) instead of a scanned identity document per person.</li>
+    <li><span class="tag">VERIFY WITH DATA</span> There's no drop-off or completion data for the current page — this restructuring is a design hypothesis (grounded in the content review's stated problems), not something measured yet. Standard 13 requires this to be tracked once the page is live.</li>
+    <li><span class="tag">KNOWN GAP</span> Real contact details for the Dirección de Planeamiento Urbano (director's name, e-mail, phone/extension) are mentioned as published in REVIEW.md's "what works" section, but weren't captured in the scraped source used for this prototype. We did not invent them — the Contacto section only points to the Dirección by name and the standard offline channels.</li>
+    <li><span class="tag">KNOWN GAP</span> This prototype does not fix REVIEW.md problem #3 (CD burned and handed in physically) or problem #4 (100% presencial, owner-only follow-up with no online status). Both are shown here as they exist today, in plain language, because fixing them is prototype 3's job (online submission + status tracking) — building a parallel fix here would duplicate that work and contradict the "ground everything, invent nothing" brief.</li>
+    <li><span class="tag">KNOWN GAP</span> The "Formulario de solicitud" and "modelo de poder de autorización" links are marked as sample links (yellow, dashed) because the scraped source doesn't give real file URLs — they don't point to actual ADN documents.</li>
+  </ul>
+</aside>
+
+<!-- ============ script — copied verbatim from _house-style.html ============ -->
+<script>
+  function goTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('page--active'));
+    var el = document.getElementById(pageId);
+    if (el) el.classList.add('page--active');
+    window.scrollTo(0, 0);
+  }
+  function toggleAssumptions() {
+    document.getElementById('assumptions').classList.toggle('drimstack-assumptions--open');
+  }
+</script>
+</body>
+</html>
