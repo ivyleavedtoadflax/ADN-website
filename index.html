@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADN · Prototipos de permisos de construcción (alfa)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+  :root { --navy:#003876; --navy-dark:#012a5a; --off:#F7F7F7; --char:#212529; --grey:#DDD; --mid:#777; --green:#2CB34A; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Poppins",system-ui,sans-serif; background:var(--off); color:var(--char); line-height:1.55; }
+  .official { background:var(--navy-dark); color:#fff; font-size:.8rem; text-align:center; padding:.35rem 1rem; }
+  header { background:var(--navy); color:#fff; padding:1.1rem 1.25rem; display:flex; align-items:center; gap:.9rem; }
+  header .escudo { width:42px; height:42px; border-radius:50%; background:#fff; color:var(--navy); display:grid; place-items:center; font-weight:700; font-size:.8rem; }
+  header small { display:block; opacity:.85; font-size:.75rem; }
+  header strong { font-size:1.05rem; }
+  .alpha { background:#fff3cd; color:#664d03; font-size:.85rem; padding:.5rem 1.25rem; text-align:center; border-bottom:1px solid #ffe69c; }
+  main { max-width:820px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+  h1 { color:var(--navy); font-size:1.9rem; }
+  .lead { font-size:1.05rem; max-width:60ch; }
+  .card { display:block; background:#fff; border:1px solid var(--grey); border-left:5px solid var(--navy); border-radius:6px; padding:1.1rem 1.25rem; margin:1rem 0; text-decoration:none; color:inherit; }
+  .card:hover { border-left-color:var(--green); }
+  .card h2 { color:var(--navy); margin:0 0 .3rem; font-size:1.2rem; }
+  .card p { margin:.2rem 0 0; color:var(--char); }
+  .card .fixes { color:var(--mid); font-size:.85rem; margin-top:.5rem; }
+  footer { background:var(--navy); color:#fff; padding:1.4rem 1.25rem; font-size:.85rem; }
+  footer a { color:#fff; }
+  .note { background:#fff; border:1px dashed #997404; color:#664d03; padding:.7rem 1rem; border-radius:6px; font-size:.9rem; }
+</style>
+</head>
+<body>
+<div class="official">Este es un servicio oficial del Gobierno de la República Dominicana</div>
+<header>
+  <span class="escudo">ADN</span>
+  <span><small>Ayuntamiento del Distrito Nacional · Planeamiento Urbano</small><strong>Permisos de construcción — prototipos</strong></span>
+</header>
+<div class="alpha">Versión alfa — estos son prototipos para pruebas, no los use para trámites reales</div>
+<main>
+  <h1>Prototipos de permisos de construcción</h1>
+  <p class="lead">Tres versiones de una mejor experiencia para solicitar permisos de construcción en el Distrito Nacional, en el estilo gob.do. Cada una arregla un problema distinto del sitio actual. Ábralas, haga clic y use el botón <em>“Ver supuestos”</em> para ver en qué se basa cada diseño.</p>
+
+  <a class="card" href="prototypes/prototype-1-pagina-de-servicio/index.html">
+    <h2>1 · Página de servicio reconstruida</h2>
+    <p>La misma Certificación de Uso de Suelo, pero con los títulos llenos, requisitos sin duplicar, costo y tiempo arriba, y los casos especiales ocultos hasta que hagan falta.</p>
+    <div class="fixes">Arregla: títulos vacíos · contenido duplicado · errores de precio · requisitos ocultos</div>
+  </a>
+
+  <a class="card" href="prototypes/prototype-2-reune-documentos/index.html">
+    <h2>2 · Reúna sus documentos antes de empezar</h2>
+    <p>Una lista interactiva que se adapta a lo que usted solicita y le muestra todos los documentos —y qué institución emite cada uno— antes de ir a Planeamiento Urbano.</p>
+    <div class="fixes">Arregla: cadena de requisitos invisible · falta de lenguaje claro</div>
+  </a>
+
+  <a class="card" href="prototypes/prototype-3-solicitud-en-linea/index.html">
+    <h2>3 · Solicitud en línea y seguimiento</h2>
+    <p>Sustituye “quemar los documentos en un CD y entregarlos en persona” por una solicitud en línea y una página para seguir su trámite durante los 30 a 45 días de espera.</p>
+    <div class="fixes">Arregla: entrega en CD y en persona · 100% presencial · sin visibilidad</div>
+  </a>
+
+  <p class="note">Prototipos de <a href="https://github.com/ivyleavedtoadflax/ADN-website">un ejercicio de diseño</a>. No están afiliados al Ayuntamiento del Distrito Nacional. Los pagos, la identidad y los datos son simulados.</p>
+</main>
+<footer>
+  <p><a href="https://www.gob.do">Portal Único gob.do</a> · Prototipo drimstack · No es un servicio en vivo</p>
+</footer>
+</body>
+</html>
